@@ -1,0 +1,9 @@
+#version 130
+
+in vec2 texture;
+
+smooth out vec2 texCoords;
+
+void getTexCoords(){
+	texCoords = texture.st;	
+}

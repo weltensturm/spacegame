@@ -1,0 +1,14 @@
+
+star {
+	model sun.obj
+	weight 332946
+	radius 696342
+}
+
+planet {
+	model earth.obj
+	weight 1
+	radius 6371
+	position 150000000 0 0
+	speed 0 107000 0
+}

@@ -1,0 +1,38 @@
+{
+
+	"name" : "engine",
+	
+	"description" : "Space Shit",
+	
+	"targetFileName": "engine",
+	"targetPath": "bin",
+	
+	"dependencies" : {
+		"derelict-gl3": "~master",
+		"derelict-ft": "~master"
+	},
+
+	"includePaths": [
+		"../"
+	],
+
+	"sourcePaths": [
+		"src",
+		"../X11",
+		"../ws"
+	],
+
+	"excludedSourceFiles": [
+		"../ws/physics/ode/*"
+	],
+	
+	"libs-posix": ["X11", "GL"],
+
+	"buildOptions": [
+		"debugMode",
+		"debugInfo",
+		"unittests"
+	]
+	
+}
+

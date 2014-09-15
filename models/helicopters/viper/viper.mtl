@@ -1,0 +1,12 @@
+
+newmtl 01___Default
+	map_Kd helicopters/viper/main.tga
+
+newmtl 02___Default
+	map_Kd helicopters/viper/cockpit.tga
+
+newmtl 03___Default
+	map_Kd helicopters/viper/glass.tga
+
+newmtl 07___Default
+	map_Kd error.mtl

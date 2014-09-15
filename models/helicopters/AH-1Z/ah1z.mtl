@@ -1,0 +1,12 @@
+
+newmtl 01___Default
+	extern main.mtl
+
+newmtl 02___Default
+	extern cockpit.mtl
+
+newmtl 03___Default
+	extern glass.mtl
+
+newmtl 07___Default
+	extern error.mtl

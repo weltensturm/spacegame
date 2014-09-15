@@ -1,0 +1,1 @@
+cube = new "Cube"

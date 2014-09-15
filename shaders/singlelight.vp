@@ -1,0 +1,15 @@
+#version 130
+
+in vec4 vertex;
+in vec3 normal;
+
+uniform mat4 matM;
+uniform mat3 matN;
+
+smooth out vec3 varyingNormal;
+smooth out vec3 worldPos;
+
+void forwardSpecular(){
+	varyingNormal = matN*normal;
+	worldPos = (matM*vertex).xyz;
+}

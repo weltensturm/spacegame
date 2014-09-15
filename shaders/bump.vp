@@ -1,0 +1,25 @@
+#version 130
+
+in vec4 vertex;
+in vec3 normal;
+
+uniform mat4 matMV;
+uniform mat3 matN;
+uniform vec3 lightPosition;
+
+smooth out vec3 bumpLightDir;
+
+void forwardBump(){
+    vec3 t, v;
+    
+    vec3 eyeNormal = matN*normal;
+
+    vec4 posMV = matMV*vertex;
+    bumpLightDir = normalize(lightPosition - posMV.xyz/posMV.w);
+
+    t = normalize(matN * vec3(1.0, 0.0, 0.0));
+    v.x = dot(bumpLightDir, t);
+    v.y = dot(bumpLightDir, cross(eyeNormal, t));
+    v.z = dot(bumpLightDir, eyeNormal);
+    bumpLightDir = normalize(v);
+}
