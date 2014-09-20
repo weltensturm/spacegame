@@ -136,17 +136,21 @@ class Editor: Base {
 	}
 
 	private void drawCube(int[3] pos){
+		/+
 		foreach(cbegin; points)
 			foreach(cend; points)
 				if(cend.x == cbegin.x || cend.y == cbegin.y || cend.z == cbegin.z)
 					engine.renderer.line(vec(pos) + cbegin, vec(pos) + cend);
+		+/
 	}
 
 	void draw3d(WorldMatrix, Light light, Material defaultMat){
+		/+
 		engine.renderer.color = [ghostColor[0]*0.5, ghostColor[1]*0.5, ghostColor[2]*0.5, ghostColor[3]*0.5];
 		drawCube(start);
 		engine.renderer.color = ghostColor;
 		drawCube(ghost);
+		+/
 	}
 
 	void worldMouseButton(Mouse.button b, bool pressed){

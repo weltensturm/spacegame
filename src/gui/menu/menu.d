@@ -26,8 +26,8 @@ class Menu: Tabs {
 	this(Commands commands, Engine engine){
 		super(left);
 		offset = 0.7;
-		style.bg = [0.3,0.3,0.3,1];
-		style.bg.hover = [0.1,0.1,0.1,1];
+		style.bg = [0.3, 0.3, 0.3, 1];
+		style.bg.hover = [0.1, 0.1 ,0.1, 1];
 		style.fg = [1, 1, 1, 1];
 		setStyle(style);
 		addPage("game", new Game(commands));

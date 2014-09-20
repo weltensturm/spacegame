@@ -38,26 +38,16 @@ static assert(ws.vers.VERSION >= 1, "Version 1 of WS required");
 
 int main(string[] args){
 	auto window = new Window(1280, 720, "Engine", args);
-	wm.add(window);
-	window.show();
 	while(wm.hasActiveWindows()){
-		/+
-		debug { // let debugger catch unhandled exceptions
-			wm.processEvents();
-			engine.onDraw();
+		try {
+			wm.processEvents(true);
+			window.onDraw();
+		}catch(Throwable e){
+			Log.error(e.toString());
+			window.hide();
+			writeln("[FATAL ERROR]\n", e);
+			return -1;
 		}
-		else{
-		+/
-			try {
-				wm.processEvents(true);
-				window.onDraw();
-			}catch(Throwable e){
-				Log.error(e.toString());
-				window.hide();
-				writeln("[FATAL ERROR]\n", e);
-				return -1;
-			}
-		//}
 	}
 	return 0;
 }
@@ -69,13 +59,15 @@ class Window: ws.wm.Window {
 	double currentTime;
 	Framerate framerate;
 	Engine engine;
-	Menu menu;
-	SpawnMenu spawnmenu;
 
 	this(int w, int h, string t, string[] args){
 		super(w, h, t);
 		chdir("..");
 		engine = add!Engine(this);
+		setTop(engine);
+		onResize(size[0], size[1]);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
 	}
 
 
@@ -97,7 +89,7 @@ class Window: ws.wm.Window {
 
 		super.onDraw();
 
-		engine.tick();
+//		engine.tick();
 		gl.check();
 		swapBuffers();
 
@@ -116,16 +108,8 @@ class Window: ws.wm.Window {
 			framerate.theoretical = 0;
 		}
 		framerate.lastRender = currentTime;
-		
 	}
 	
-
-	override void onMouseMove(int x, int y) {
-		if(!hasFocus)
-			return;
-		return super.onMouseMove(x, y);
-	}
-
 
 	override void onKeyboard(Keyboard.key key, bool pressed){
 		scope(exit)
@@ -140,7 +124,7 @@ class Window: ws.wm.Window {
 		glViewport(0, 0, x, y);
 		draw.setScreenResolution(x, y);
 		foreach(c; children ~ hiddenChildren)
-			c.setSize(Point(x,y)-c.pos);
+			c.setSize(Point(x, y) - c.pos);
 		super.onResize(x, y);
 	}
 	
