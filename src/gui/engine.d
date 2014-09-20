@@ -3,6 +3,7 @@ module gui.engine;
 import
 	ws.gui.base,
 	ws.gl.render,
+	ws.gl.model,
 	ws.time,
 	ws.io,
 	gui.console,
@@ -10,11 +11,14 @@ import
 	game.system.bulletWorld,
 	game.system.noclip,
 	game.component.camera,
+	game.component.drawable,
+	game.component.transform,
 	game.system.draw,
 	ws.math,
 	game.controls,
 	game.commands,
 	gui.menu.menu,
+	gui.worldPerspective,
 	window,
 	lua;
 
@@ -34,18 +38,20 @@ class Engine: Base {
 	Menu menu;
 	float lastRender, frameTime;
 	Window window;
+	WorldPerspective perspective;
 
 	this(Window window){
 		this.window = window;
 		lua = new Lua();
 
 		commands = new Commands();
+		commands.add("exit", &window.hide);
 		controls = new Controls("config/controls.ws", commands);
+		controls.load();
 
 		console = add!Console(commands, lua);
 		console.hide();
 		menu = add!Menu(commands, this);
-		controls.load();
 		lua.runFile("scripts/autorun.lua");
 
 		setTop(menu);
@@ -56,7 +62,15 @@ class Engine: Base {
 		lastRender = time.now();
 		setCursor(Mouse.cursor.none);
 
-		commands.add("exit", &window.hide);
+		perspective = add!WorldPerspective(window, ents, commands);
+
+		auto sponza = ents.create!(Drawable,Transform);
+		sponza.get!Drawable.model = perspective.drawSystem.getModel("maps/sponza.obj");
+		foreach(drawable, transform; ents.iterate!(Drawable, Transform)){
+			writeln(drawable.model.path);
+			writeln(transform.position);
+		}
+
 		/+
 		player = system.createPlayer();
 		player = new Player(entityList, engine);
@@ -81,19 +95,7 @@ class Engine: Base {
 	override void onResize(int x, int y){
 		menu.setSize(x, y);
 		console.setSize(x, y);
-	}
-
-
-	double pow(double n, double e){
-		int sign = (n > 0 ? 1 : -1);
-		double pow = (n*sign)^^e;
-		return pow*sign;
-	}
-
-
-	override void onMouseMove(int x, int y){
-		writeln(x, ' ', y);
-		super.onMouseMove(x, y);
+		perspective.setSize(x, y);
 	}
 
 

@@ -83,10 +83,10 @@ class Controls {
 		if(keyId in bindings){
 			if(bindings[keyId] !in commands.commands)
 				exception(tostring("\"%\" is not a registered command", bindings[keyId]));
-			commands.run(bindings[keyId], pressed);
+			commands.run(bindings[keyId], pressed ? 1 : 0);
 		}
 	}
-	
+
 	void input(int id, float value){
 		auto keyId = getKeyName(id);
 		if(keyId in bindings){

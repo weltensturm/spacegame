@@ -34,7 +34,7 @@ class Commands {
 				} else
 					static assert(0, T.length);
 			}catch(ConvException e)
-				Log.warning("Cannot run % with %".format(name, arg));
+				Log.warning("Cannot run %s with %s".format(name, arg));
 		};
 	}
 

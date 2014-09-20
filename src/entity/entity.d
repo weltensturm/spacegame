@@ -12,18 +12,11 @@ final class Entity {
 	private	Component[string] components;
 
 	T get(T)(){
-		return components[T.stringof];
+		return cast(T)components[typeid(T).toString];
 	}
 
 	Component get(string s){
 		return components[s];
-	}
-
-	private void addComponents()(Entity){}
-
-	private void addComponents(T, Tnext...)(Entity e){
-		components[typeid(T).toString] = new T(e);
-		addComponents!Tnext(e);
 	}
 
 }
@@ -36,7 +29,7 @@ template Tuple(E...) {
 
 class EntityManager {
 
-	private Entity[][string] entityList;
+	private Entity[] entityList;
 
 	Entity create(Components...)(){
 		auto e = new Entity;
@@ -45,20 +38,31 @@ class EntityManager {
 		return e;
 	}
 
-	Entity[] get(T, Args...)(){
+	Entity[] get(Args...)(){
+		Entity[] result;
 		string[] names = typenames!Args;
-		Entity[] result = entityList.get(typeid(T).toString, []);
-		foreach(name; names){
-			Entity[] tmp;
-			foreach(e; setIntersection(result, entityList.get(name, [])))
-				tmp ~= e;
-			result = tmp;
+		foreach(e; entityList){
+			bool valid = false;
+			foreach(name; names){
+				if(name !in e.components)
+					break;
+				valid = true;
+			}
+			if(valid)
+				result ~= e;
 		}
 		return result;
 	}
 
 	ComponentIterator!Args iterate(Args...)(){
 		return ComponentIterator!Args(this);
+	}
+
+	private void addComponents()(Entity e){}
+
+	private void addComponents(T, Tnext...)(Entity e){
+		e.components[typeid(T).toString] = new T;
+		addComponents!Tnext(e);
 	}
 
 
@@ -76,11 +80,11 @@ private struct ComponentIterator(Args...) {
 	int opApply(int delegate(Args) dg){
 		int result = 0;
 		Args components;
-
 		string[] names = typenames!Args;
 		foreach(r; em.get!Args){
-			foreach(ref component; components)
-				component = cast(typeof(component))r.get(typeid(component).toString);
+			foreach(i, component; components){
+				components[i] = cast(Args[i])r.get(typeid(Args[i]).toString);
+			}
 			result = dg(components);
 			if(result)
 				break;

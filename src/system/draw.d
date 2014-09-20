@@ -88,7 +88,6 @@ class Draw: System {
 	protected {
 
 		Model[string] models;
-		Drawable[] drawables;
 		LoaderThread glLoader;
 		LoaderQueue mainLoader;
 		EntityManager ents;
@@ -109,10 +108,6 @@ class Draw: System {
 		return m;
 	}
 	
-	void finishMaterial(Material m){
-		m.finish();
-	}
-	
 	this(Window window, EntityManager ents, Camera delegate() camera){
 		this.ents = ents;
 		matrix = new WorldMatrix(camera);
@@ -121,9 +116,12 @@ class Draw: System {
 			["vertex": gl.attributeVertex, "normal": gl.attributeNormal, "texture": gl.attributeTexture]
 		);
 		defaultMat.finish();
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		render = new Render({ return matrix.getModelviewProjection(); });
-
+		auto sharedContext = window.shareContext;
+		glLoader = new LoaderThread({
+			window.makeCurrent(sharedContext);
+		});
+		mainLoader = new LoaderQueue;
 	}
 
 	void draw(){
@@ -138,7 +136,6 @@ class Draw: System {
 		render.line(light.position, light.position + Vector!3(0,0,10));
 
 		foreach(drawable, transform; ents.iterate!(Drawable, Transform)){
-
 			matrix.push();
 
 			if(!drawable.model || !drawable.model.loaded)
@@ -167,10 +164,10 @@ class Draw: System {
 			matrix.pop();
 		}
 		matrix.pop();
-		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
-		//lastRender = currentTime;
+
+		mainLoader.tick();
 	}
 
 }

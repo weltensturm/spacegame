@@ -20,10 +20,8 @@ class ControlsMenu: List {
 
 	override void onShow(){
 		children.clear();
-		/+
-		foreach(name, action; controls.controls.commands)
-			add(new ControlsButton(name, controls.controls.getActionKey(name), this.controls.controls));
-		+/
+		foreach(command, fn; controls.commands.commands)
+			add(new ControlsButton(command, controls));
 	}
 
 }
@@ -36,10 +34,10 @@ class ControlsButton: Button {
 	string key;
 	Controls controls;
 
-	this(string action, string key, Controls controls){
+	this(string action, Controls controls){
 		super("");
 		this.action = action;
-		this.key = key;
+		this.key = controls.getBind(action);
 		this.controls = controls;
 		updateText();
 		leftClick ~= {
