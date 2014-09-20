@@ -10,7 +10,7 @@ import
 class Creator: Weapon {
 
 	this(Engine engine){
-		creator = engine.add!Editor(engine);
+		creator = engine.add!Editor(engine, engine.commands);
 		creator.hide;
 		name = "Creator";
 	}

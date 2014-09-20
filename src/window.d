@@ -12,6 +12,7 @@ import
 	ws.vers,
 	ws.io,
 	ws.log,
+	ws.math,
 	ws.decode,
 	ws.exception,
 	ws.time,
@@ -27,10 +28,7 @@ import
 	gui.menu.menu,
 	gui.engine,
 	gui.console,
-	gui.spawnmenu,
-	game.controls,
-	game.commands,
-	lua;
+	gui.spawnmenu;
 
 __gshared:
 
@@ -41,6 +39,7 @@ static assert(ws.vers.VERSION >= 1, "Version 1 of WS required");
 int main(string[] args){
 	auto window = new Window(1280, 720, "Engine", args);
 	wm.add(window);
+	window.show();
 	while(wm.hasActiveWindows()){
 		/+
 		debug { // let debugger catch unhandled exceptions
@@ -50,7 +49,7 @@ int main(string[] args){
 		else{
 		+/
 			try {
-				wm.processEvents();
+				wm.processEvents(true);
 				window.onDraw();
 			}catch(Throwable e){
 				Log.error(e.toString());
@@ -70,17 +69,12 @@ class Window: ws.wm.Window {
 	double currentTime;
 	Framerate framerate;
 	Engine engine;
-	Controls controls;
-	Commands commands;
-	Lua lua;
 	Menu menu;
 	SpawnMenu spawnmenu;
 
 	this(int w, int h, string t, string[] args){
 		super(w, h, t);
 		chdir("..");
-		lua = new Lua(this);
-		controls = new GameControls("config/controls.ws");
 		engine = add!Engine(this);
 	}
 
@@ -127,14 +121,9 @@ class Window: ws.wm.Window {
 	
 
 	override void onMouseMove(int x, int y) {
-		if(!hasKeyboardFocus) return;
+		if(!hasFocus)
+			return;
 		return super.onMouseMove(x, y);
-	}
-
-
-	override void onMouseButton(Mouse.button b, bool p, int x, int y){
-		controls.buttonPress("Global", b, p);
-		super.onMouseButton(b, p, x, y);
 	}
 
 
@@ -143,14 +132,7 @@ class Window: ws.wm.Window {
 			Keyboard.set(key, pressed);
 		if(pressed && key == 'q' && Keyboard.get(Keyboard.control))
 			hide();
-		controls.keyPress("Global", key, pressed);
 		super.onKeyboard(key, pressed);
-	}
-
-
-	override void onKeyboardFocus(bool focus){
-		super.onKeyboardFocus(focus);
-		hasKeyboardFocus = focus;
 	}
 
 

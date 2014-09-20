@@ -1,4 +1,4 @@
-module entity.camera;
+module game.component.camera;
 
 import
 	ws.math.math,

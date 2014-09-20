@@ -32,26 +32,29 @@ class VoxelHeap: System {
 	}
 
 	void spawn(VoxelPos pos){
+		/+
 		if(pos !in cubes){
-			/+ TODO: add cubes
+			TODO: add cubes
 			auto cube = world.entityList.create("UniformCube");
 			cube.setPos(vec(pos));
 			cubes[pos] = cube;
-			+/
 		}
+		+/
 	}
 
 	void remove(VoxelPos pos){
+		/+
 		if(pos in cubes){
 			cubes[pos].remove;
 			cubes.remove(pos);
 		}
+		+/
 	}
 
 	LineCubeResult trace(Vector!3 start, Vector!3 dir){
 		LineCubeResult result;
-		foreach(pos, cube; cubes){
-			auto collision = collide(Line(start, dir), Cube(vec(pos[0], pos[1], pos[2]), 1));
+		foreach(cube; cubes){
+			auto collision = collide(Line(start, dir), Cube(vec(cube[0], cube[1], cube[2]), 1));
 			if(collision && (!result || collision.distance < result.distance)){
 				result = collision;
 			}
@@ -71,7 +74,7 @@ class VoxelHeap: System {
 	}
 
 	Nullable!VoxelPos spawnPos(Vector!3 start, Vector!3 dir){
-		auto res = hitCube(start, dir);
+		auto res = trace(start, dir);
 		if(res){
 			auto p = res.pos + res.normal/2;
 			return new Nullable!VoxelPos(Vector!(3,int)([

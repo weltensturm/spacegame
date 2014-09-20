@@ -11,14 +11,14 @@ import
 	ws.gui.text,
 	ws.gui.inputField,
 	ws.math.vector,
-	game.controls,
+	game.commands,
 	lua;
 
 //__gshared:
 
 class Console: Base {
 	
-	this(Controls controls, Lua lua){
+	this(Commands commands, Lua lua){
 		textField = add!Text();
 		textField.setLocalPos(5, 30);
 		textField.setFont("UbuntuMono-R", 11);
@@ -44,9 +44,7 @@ class Console: Base {
 		};
 		textBox.setFont("UbuntuMono-R", 11);
 		setTop(textBox);
-		controls.add("Console", (args, p){
-			if(!p)
-				return;
+		commands.add("open_console", {
 			hidden ? show() : hide();
 		});
 

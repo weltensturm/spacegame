@@ -9,17 +9,19 @@ import
 
 	ws.gl.render,
 
-	entity.camera,
+	game.component.camera,
 	gui.engine,
 
 	editor.editor,
 	game.component.noclip,
+	game.component.transform,
 	game.system.voxelHeap;
 
 
 class Perspective: Base {
 
-	Noclip movement;
+	Camera camera;
+	Noclip position;
 	bool forwardInput;
 	Editor creator;
 
@@ -28,11 +30,10 @@ class Perspective: Base {
 
 	}
 
-
 	override void onDraw(){
 		if(forwardInput){
 			draw.setColor(1,1,1,1);
-			auto origin = world.size/2;
+			auto origin = size/2;
 			draw.line(origin-[10,0], origin+[10,0]);
 			draw.line(origin-[0,10], origin+[0,10]);
 			super.onDraw;

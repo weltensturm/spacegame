@@ -31,13 +31,12 @@ class Menu: Tabs {
 		style.fg = [1, 1, 1, 1];
 		setStyle(style);
 		addPage("game", new Game(commands));
-		addPage("options", new Options(commands));
+		addPage("options", new Options(commands, engine.controls));
 		addPage("quit", new Base).button.leftClick ~= {
 			commands.run("exit");
 		};
-		commands.add("Menu", (int arg){
-			if(p>0 && (engine.hasFocus || !hidden))
-				hidden ? show() : hide();
+		commands.add("menu_toggle", {
+			hidden ? show() : hide();
 		});
 	}
 

@@ -20,8 +20,10 @@ class ControlsMenu: List {
 
 	override void onShow(){
 		children.clear();
+		/+
 		foreach(name, action; controls.controls.commands)
 			add(new ControlsButton(name, controls.controls.getActionKey(name), this.controls.controls));
+		+/
 	}
 
 }
@@ -56,8 +58,8 @@ class ControlsButton: Button {
 
 	override void onMouseButton(Mouse.button b, bool p, int x, int y){
 		if(p && waitingForInput){
-			key = controls.getButtonName(b);
-			controls.set(action, key);
+			key = getButtonName(b);
+			controls.bind(action, key);
 			waitingForInput = false;
 			updateText();
 		}else{
@@ -67,8 +69,8 @@ class ControlsButton: Button {
 
 	override void onKeyboard(Keyboard.key k, bool p){
 		if(p && waitingForInput){
-			key = controls.getKeyName(k);
-			controls.set(action, key);
+			key = getKeyName(k);
+			controls.bind(action, key);
 			waitingForInput = false;
 			updateText();
 		}

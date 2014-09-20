@@ -1,11 +1,12 @@
-module game.physics.bulletWorld;
+module game.system.bulletWorld;
 
 import
+	std.file,
 	core.thread,
 	ws.physics.bullet.cbullet,
 	ws.physics.bullet.object,
 	ws.physics.bullet.shape,
-	ws.io,
+	ws.log,
 	ws.list,
 	ws.time,
 	ws.math,
@@ -15,7 +16,7 @@ import
 __gshared:
 
 
-class BulletWorld: Thread {
+class BulletSystem: Thread {
 
 
 	BulletWorld* world;
@@ -50,7 +51,7 @@ class BulletWorld: Thread {
 			}
 			shapes[phpath] = shape;
 		}
-		auto o = new BulletObject(world, s);
+		auto o = new BulletObject(world, shape);
 		o.finish();
 		objects ~= o;
 		return o;

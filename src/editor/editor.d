@@ -16,12 +16,12 @@ import
 	ws.gl.model,
 
 	window,
-	entity.camera,
 	gui.engine,
 
 	editor.spawner,
 	editor.perspective,
 	game.commands,
+	game.component.noclip,
 	game.system.draw,
 	game.system.voxelHeap;
 
@@ -34,46 +34,41 @@ class Editor: Base {
 	protected {
 		List left;
 		List right;
-
 		Button spawnerButton;
-
 		Perspective perspective;
-
 	}
 
-
 	Mode mode;
-
 	Vector!3[] points;
 	int[3] ghost;
 	int[3] start;
 	float[4] ghostColor;
 	VoxelHeap spawnGrid;
-
+	Engine engine;
 
 	this(Engine engine, Commands commands){
-		this.world = world;
+		this.engine = engine;
 		style.bg = [0.3,0.3,0.3,1];
 		left = add!List;
 		left.style = style;
 		left.setSize(200,0);
 
-		perspective = add!Perspective(world, this);
+		perspective = add!Perspective(this);
 
 		commands.add("editor_perspective_speed_x", (float n){
-			perspective.speedTarget[0] = n;
+			perspective.position.velocityTarget[0] = n;
 		});
 		commands.add("editor_perspective_speed_y", (float n){
-			perspective.speedTarget[1] = n;
+			perspective.position.velocityTarget[1] = n;
 		});
 		commands.add("editor_perspective_speed_z", (float n){
-			perspective.speedTarget[2] = n;
+			perspective.position.velocityTarget[2] = n;
 		});
 		commands.add("editor_perspective_turn_pitch", (float n){
-			perspective.rotate(-pow(x/10.0, 1.2), 0,0,1);
+			perspective.camera.angle.rotate(-pow(n/10.0, 1.2), 0,0,1);
 		});
 		commands.add("editor_perspective_turn_yaw", (float n){
-			perspective.rotate(pow(n/10.0, 1.2), -perspective.angle.right());
+			perspective.camera.angle.rotate(pow(n/10.0, 1.2), -perspective.camera.angle.right());
 		});
 		commands.add("editor_mode_add", (){
 			setMode(Mode.add);
@@ -82,7 +77,7 @@ class Editor: Base {
 			setMode(Mode.remove);
 		});
 
-		spawnGrid = new VoxelHeap(world);
+		spawnGrid = new VoxelHeap();
 
 		setMode(Mode.add);
 
@@ -102,7 +97,7 @@ class Editor: Base {
 				foreach(z; 0..2)
 					points ~= vec(x-0.5, y-0.5, z-0.5);
 					
-		world.draw ~= &draw3d;
+		//world.draw ~= &draw3d;
 	}
 
 
@@ -126,10 +121,10 @@ class Editor: Base {
 		/+
 		right.setPos(w-right.size.x, 0);
 		right.setSize(right.size.x, h);
-		+/
-
 		spawner.setPos(spawnerButton.pos.x, spawnerButton.pos.y - 400);
 		spawner.setSize(spawnerButton.size.x, 400);
+		+/
+
 
 		Perspective.setSize(w - left.size.x, h);
 		Perspective.setPos(left.pos.x + left.size.x, 0);
@@ -144,20 +139,20 @@ class Editor: Base {
 		foreach(cbegin; points)
 			foreach(cend; points)
 				if(cend.x == cbegin.x || cend.y == cbegin.y || cend.z == cbegin.z)
-					world.render.line(vec(pos) + cbegin, vec(pos) + cend);
+					engine.renderer.line(vec(pos) + cbegin, vec(pos) + cend);
 	}
 
 	void draw3d(WorldMatrix, Light light, Material defaultMat){
-		world.render.color = [ghostColor[0]*0.5, ghostColor[1]*0.5, ghostColor[2]*0.5, ghostColor[3]*0.5];
+		engine.renderer.color = [ghostColor[0]*0.5, ghostColor[1]*0.5, ghostColor[2]*0.5, ghostColor[3]*0.5];
 		drawCube(start);
-		world.render.color = ghostColor;
+		engine.renderer.color = ghostColor;
 		drawCube(ghost);
 	}
 
 	void worldMouseButton(Mouse.button b, bool pressed){
 		if(b == Mouse.buttonRight && pressed){
 			perspective.forwardInput = !perspective.forwardInput;
-			world.onMouseFocus(perspective.forwardInput);
+			//world.onMouseFocus(perspective.forwardInput);
 			setCursor(perspective.forwardInput ? Mouse.cursor.none : Mouse.cursor.inherit);
 		}else if(b == Mouse.buttonLeft){
 			/*
@@ -178,17 +173,15 @@ class Editor: Base {
 		}
 	}
 
-	void worldMouseMove(int x, int y){
-		auto camera = world.player.camera;
-		auto dir = camera.screenToWorld([x, y], world.size);
+	override void onMouseMove(int x, int y){
+		auto dir = perspective.camera.screenToWorld([x, y], size);
 		Nullable!(int[3]) pos;
 		if(mode == Mode.add)
-			pos = spawnGrid.spawnPos(camera.getPos, dir);
+			pos = spawnGrid.spawnPos(perspective.camera.position, dir);
 		else if(mode == Mode.remove)
-			pos = spawnGrid.removePos(camera.getPos, dir);
+			pos = spawnGrid.removePos(perspective.camera.position, dir);
 		if(pos)
 			ghost = pos;
-		world.light.position = camera.getPos;
 	}
 
 }

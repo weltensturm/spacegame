@@ -22,10 +22,12 @@ class BallCannon: Weapon {
 	override
 	void onPrimary(bool pressed){
 		if(pressed){
+			/+
 			auto obj = ents.create("Sphere");
 			auto dir = owner.aimDir();
 			obj.physics.position = owner.position + dir*2;
 			obj.physics.velocity = dir*200;
+			+/
 		}
 	}
 

@@ -1,4 +1,4 @@
-module game.system.bulletPhysics;
+module game.componen.bulletPhysics;
 
 import
 	std.math,
@@ -8,12 +8,18 @@ import
 	ws.math.vector,
 	ws.math.quaternion,
 	ws.physics.bullet.object,
+	game.system.bulletWorld,
 	game.component.component;
 
 
 class BulletPhysics: Component {
-		
+
 	BulletObject physObject;
+	BulletSystem world;
+
+	this(BulletSystem world){
+		this.world = world;
+	}
 
 	@property
 	Vector!3 position(){
@@ -52,7 +58,8 @@ class BulletPhysics: Component {
 
 	@property
 	double mass(){
-		return physObject.getMass();
+		return 1;
+		//return physObject.getMass();
 	}
 
 	void applyForce(Vector!3 v){
@@ -62,11 +69,10 @@ class BulletPhysics: Component {
 	void tick(float frameTime){}
 
 	void setModel(string path){
-		super.setModel(path);
 		if(exists("models/" ~ path)){
 			if(physObject)
 				physObject.destroy();
-			physObject = entityList.resourceLoader.getPhysicsModel(path);
+			physObject = world.getPhysicsModel(path);
 		}else
 			exception("Physics entity: \"" ~ path ~ "\" does not exist");
 	}
@@ -77,6 +83,4 @@ class BulletPhysics: Component {
 	}
 
 }
-
-
 

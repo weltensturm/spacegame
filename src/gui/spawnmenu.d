@@ -23,8 +23,8 @@ class SpawnMenu: Tabs {
 		super(top);
 		engine = e;
 		offset = 0.7;
-		e.controls.add("Spawn Menu", (arg, p){
-			if(engine.world.hasFocus || !p)
+		e.commands.add("spawnmenu_show", (bool p){
+			if(engine.hasFocus || !p)
 				p ? show() : hide();
 		});
 		addPage("Entities", add!ListEntities(e));
@@ -47,9 +47,11 @@ private:
 		
 		this(Engine e){
 			super(Point(100, 100));
+			/+
 			foreach(name, factory; e.world.entityList.classes)
 				addEntry(name, factory.factory);
 			engine = e;
+			+/
 		}
 
 		void addEntry(string n, Entity delegate() factory){

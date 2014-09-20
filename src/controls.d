@@ -9,7 +9,8 @@ import
 	ws.log,
 	ws.string,
 	ws.decode,
-	ws.gui.input;
+	ws.gui.input,
+	game.commands;
 
 
 alias void delegate(string, string) Command;
@@ -66,30 +67,32 @@ class Controls {
 	}
 
 
-	void bind(string action, string key){
+	void bind(string action, string key, bool shouldSave=true){
 		foreach(k,i; bindings)
 			if(i == action){
 				bindings.remove(k);
 				break;
 			}
 		bindings[key] = action;
+		if(shouldSave)
+			save();
 	}
 
 	void keyPress(int key, bool pressed){
 		auto keyId = getKeyName(key);
 		if(keyId in bindings){
-			if(bindings[keyId] !in commands)
+			if(bindings[keyId] !in commands.commands)
 				exception(tostring("\"%\" is not a registered command", bindings[keyId]));
-			commands[bindings[keyId]]("", pressed);
+			commands.run(bindings[keyId], pressed);
 		}
 	}
 	
 	void input(int id, float value){
-		auto keyId = getKeyName(key);
+		auto keyId = getKeyName(id);
 		if(keyId in bindings){
-			if(bindings[keyId] !in commands)
+			if(bindings[keyId] !in commands.commands)
 				exception(tostring("\"%\" is not a registered command", bindings[keyId]));
-			commands[bindings[keyId]](value);
+			commands.run(bindings[keyId], value);
 		}
 	}
 
@@ -109,7 +112,7 @@ class Controls {
 	void save(){
 		try {
 			string content;
-			foreach(action, key; categories)
+			foreach(action, key; bindings)
 				content ~= '\"' ~ key ~ "\" \"" ~ action ~ "\"\n";
 			write(path, content);
 		}catch(FileException e){

@@ -16,12 +16,13 @@ import
 	ws.math.vector,
 	window,
 	game.commands,
+	game.controls,
 	gui.menu.controls;
 
 
 class Options: Tabs {
 	
-	this(Commands commands){
+	this(Commands commands, Controls controls){
 		super(left);
 		offset = 0.7;
 		style.bg = [0.9, 0.9, 0.9, 0.8];
@@ -30,7 +31,7 @@ class Options: Tabs {
 		buttonStyle.fg = style.fg;
 		swap(buttonStyle.bg.normal, buttonStyle.bg.hover);
 		font = "Ubuntu-R";
-		addPage("controls", new Controls(commands));
+		addPage("controls", new ControlsMenu(controls));
 		addPage("graphics", new Lighting(commands));
 	}
 
@@ -45,7 +46,6 @@ class Lighting: List {
 		super();
 		padding = 5;
 		entryHeight = 25;
-		this.engine = engine;
 		s = add!SliderDecorated("Lumen", 1, 10000, 100);
 		s.onSlide ~= (v){
 			commands.run("world_light_intensity", v);

@@ -16,8 +16,15 @@ import
 
 class WeaponSelection: Base {
 
+	protected {
+		Weapons weapons;
+		Text titles[];
+		float lastActive;
+		float visibleTime = 2;
+	}
+
 	this(Weapons weapons){
-		this.player = player;
+		this.weapons = weapons;
 	}
 
 	override void onDraw(){
@@ -25,41 +32,35 @@ class WeaponSelection: Base {
 		if(lastActive > t-visibleTime){
 			float alpha = clamp((lastActive-t+visibleTime)*5, 0, 1);
 			int count = 0;
-			foreach(name, weapon; weapons){
-				if(weapon == player.weapon)
+			foreach(i, text; titles){
+				if(i == weapons.active)
 					draw.setColor(0.5,0.1,0.1,alpha);
 				else
 					draw.setColor(0.1,0.1,0.1,alpha);
 				draw.rect(pos+Point(0,count++*30), [size.x, 30]);
-				name.style.fg = [1,1,1,alpha];
+				text.style.fg = [1,1,1,alpha];
 			}
 			super.onDraw(); 
 		}
 	}
 	
 	void update(){
-		foreach(n, w; weapons)
-			children.remove(n);
-		weapons.destroy;
-		foreach(i, weapon; player.allWeapons){
+		foreach(t; titles)
+			children.remove(t);
+		titles.destroy;
+		foreach(i, weapon; weapons.weapons){
 			auto name = add!Text();
 			name.text.set(weapon.name);
 			name.setFont("UbuntuMono-R", cast(int)(30/1.5));
 			name.setSize(size.x, 30);
 			name.setPos(pos.x, pos.y + cast(int)i*30);
-			weapons[name] = weapon;
+			titles ~= name;
 		}
 		lastActive = time.now;
 	}
 
 	void clear(){
 		lastActive = time.now-visibleTime;
-	}
-
-	protected {
-		Weapons weapons;
-		float lastActive;
-		float visibleTime = 2;
 	}
 
 }

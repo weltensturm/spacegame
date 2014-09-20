@@ -6,6 +6,7 @@
 	
 	"targetFileName": "engine",
 	"targetPath": "bin",
+	"targetType": "executable",
 	
 	"dependencies" : {
 		"derelict-gl3": "~master",
