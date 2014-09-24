@@ -19,7 +19,6 @@
 
 	"sourcePaths": [
 		"src",
-		"../X11",
 		"../ws"
 	],
 

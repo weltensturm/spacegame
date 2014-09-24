@@ -1,24 +1,31 @@
 module gui.engine;
 
 import
+	std.parallelism,
+
+	ws.math,
 	ws.gui.base,
 	ws.gl.render,
 	ws.gl.model,
 	ws.time,
 	ws.io,
+
 	gui.console,
+	gui.menu.menu,
+	gui.worldPerspective,
+
 	game.entity.entity,
 	game.system.bulletWorld,
 	game.system.noclip,
-	game.component.camera,
 	game.component.drawable,
 	game.component.transform,
+	game.component.noclip,
+	game.component.weapons,
+	game.component.projection,
 	game.system.draw,
-	ws.math,
 	game.controls,
 	game.commands,
-	gui.menu.menu,
-	gui.worldPerspective,
+
 	window,
 	lua;
 
@@ -36,7 +43,6 @@ class Engine: Base {
 	Controls controls;
 	Commands commands;
 	Menu menu;
-	float lastRender, frameTime;
 	Window window;
 	WorldPerspective perspective;
 
@@ -57,38 +63,74 @@ class Engine: Base {
 		setTop(menu);
 
 		ents = new EntityManager;
+
 		physicsSystem = new BulletSystem;
+		task(&physicsSystem.loop).executeInNewThread();
+
 		noclipSystem = new NoclipSystem(ents);
-		lastRender = time.now();
+		task(&noclipSystem.loop).executeInNewThread();
+
 		setCursor(Mouse.cursor.none);
 
-		perspective = add!WorldPerspective(window, ents, commands);
+		auto localPlayer = createPlayer;
+
+		perspective = add!WorldPerspective(window, ents, commands, localPlayer);
 
 		auto sponza = ents.create!(Drawable,Transform);
 		sponza.get!Drawable.model = perspective.drawSystem.getModel("maps/sponza.obj");
-		foreach(drawable, transform; ents.iterate!(Drawable, Transform)){
-			writeln(drawable.model.path);
-			writeln(transform.position);
-		}
 
-		/+
-		player = system.createPlayer();
-		player = new Player(entityList, engine);
-		player.setAngle(Quaternion.euler(0, 0, 45));
-		player.setPos(Vector!3(0,-5,5));
-		player.giveWeapon(new CubeCannon(engine));
-		player.giveWeapon(new Creator(engine, this));
-		+/
 
 		//auto bulletDebug = new DebugDrawer(physicsSystem.world);
 	}
 
-	void tick(){
-		float currentTime = time.now();
-		frameTime = (currentTime - lastRender).clamp!double(0, 1.0/60.0);
-		lastRender = currentTime;
-		physicsSystem.tick(frameTime);
-		noclipSystem.tick(frameTime);
+
+	override void hide(){
+		physicsSystem.shutdown();
+		noclipSystem.shutdown();
+	}
+
+
+	double pow(double n, double e){
+		int sign = (n > 0 ? 1 : -1);
+		double pow = (n*sign)^^e;
+		return pow*sign;
+	}
+
+
+	Entity createPlayer(){
+		auto player = ents.create!(Projection, Noclip, Transform, Weapons);
+
+		auto playerTransform = player.get!Transform;
+		auto playerMovement = player.get!Noclip;
+		playerMovement.acceleration = 1;
+
+		commands.add("look_x", (float x){
+			if(!perspective.hasFocus)
+				return;
+			playerTransform.angle.rotate(pow(-x, 1.1), 0, 0, 1);
+			window.setCursorPos(cast(int)(size.x / 2), cast(int)(size.y / 2));
+		});
+
+		commands.add("look_y", (float y){
+			if(!perspective.hasFocus)
+				return;
+			playerTransform.angle.rotate(pow(-y, 1.1), playerTransform.angle.right());
+			window.setCursorPos(cast(int)(size.x / 2), cast(int)(size.y / 2));
+		});
+
+		commands.add("move_x", (float x){
+			if(!perspective.hasFocus)
+				return;
+			playerMovement.velocityTarget[0] = x;
+		});
+
+		commands.add("move_y", (float y){
+			if(!perspective.hasFocus)
+				return;
+			playerMovement.velocityTarget[1] = y;
+		});
+
+		return player;
 	}
 
 
@@ -100,8 +142,6 @@ class Engine: Base {
 
 
 	void onRawMouse(int x, int y){
-		if(!hasFocus)
-			return;
 		controls.input(Mouse.X, x);
 		controls.input(Mouse.Y, y);
 	}
@@ -120,4 +160,3 @@ class Engine: Base {
 
 
 }
-

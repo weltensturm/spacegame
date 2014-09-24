@@ -40,8 +40,8 @@ int main(string[] args){
 	auto window = new Window(1280, 720, "Engine", args);
 	while(wm.hasActiveWindows()){
 		try {
-			wm.processEvents(true);
-			window.onDraw();
+			wm.processEvents;
+			window.onDraw;
 		}catch(Throwable e){
 			Log.error(e.toString());
 			window.hide();
@@ -49,6 +49,7 @@ int main(string[] args){
 			return -1;
 		}
 	}
+	Log.info("Bye!");
 	return 0;
 }
 
@@ -87,11 +88,10 @@ class Window: ws.wm.Window {
 		glClearColor(0.2, 0.2, 0.2, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		super.onDraw();
+		super.onDraw;
 
-//		engine.tick();
-		gl.check();
-		swapBuffers();
+		gl.check;
+		swapBuffers;
 
 		framerate.theoretical += (renderStart - framerate.lastRender);
 		framerate.renderTimes++;
@@ -117,6 +117,12 @@ class Window: ws.wm.Window {
 		if(pressed && key == 'q' && Keyboard.get(Keyboard.control))
 			hide();
 		super.onKeyboard(key, pressed);
+	}
+
+
+	override void hide(){
+		super.hide;
+		engine.hide;
 	}
 
 

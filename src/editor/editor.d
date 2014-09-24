@@ -17,9 +17,9 @@ import
 
 	window,
 	gui.engine,
+	gui.worldPerspective,
 
 	editor.spawner,
-	editor.perspective,
 	game.commands,
 	game.component.noclip,
 	game.system.draw,
@@ -35,7 +35,7 @@ class Editor: Base {
 		List left;
 		List right;
 		Button spawnerButton;
-		Perspective perspective;
+		WorldPerspective perspective;
 	}
 
 	Mode mode;
@@ -53,8 +53,9 @@ class Editor: Base {
 		left.style = style;
 		left.setSize(200,0);
 
-		perspective = add!Perspective(this);
+		perspective = engine.perspective;
 
+		/+
 		commands.add("editor_perspective_speed_x", (float n){
 			perspective.position.velocityTarget[0] = n;
 		});
@@ -76,6 +77,7 @@ class Editor: Base {
 		commands.add("editor_mode_remove", (){
 			setMode(Mode.remove);
 		});
+		+/
 
 		spawnGrid = new VoxelHeap();
 
@@ -89,8 +91,6 @@ class Editor: Base {
 
 		auto removeButton = left.add!Button("remove");
 		removeButton.leftClick ~= { setMode(Mode.remove); };
-
-		setTop(perspective);
 
 		foreach(x; 0..2)
 			foreach(y; 0..2)
@@ -124,10 +124,6 @@ class Editor: Base {
 		spawner.setPos(spawnerButton.pos.x, spawnerButton.pos.y - 400);
 		spawner.setSize(spawnerButton.size.x, 400);
 		+/
-
-
-		Perspective.setSize(w - left.size.x, h);
-		Perspective.setPos(left.pos.x + left.size.x, 0);
 	}
 
 
@@ -155,9 +151,9 @@ class Editor: Base {
 
 	void worldMouseButton(Mouse.button b, bool pressed){
 		if(b == Mouse.buttonRight && pressed){
-			perspective.forwardInput = !perspective.forwardInput;
+			//perspective.forwardInput = !perspective.forwardInput;
 			//world.onMouseFocus(perspective.forwardInput);
-			setCursor(perspective.forwardInput ? Mouse.cursor.none : Mouse.cursor.inherit);
+			//setCursor(perspective.forwardInput ? Mouse.cursor.none : Mouse.cursor.inherit);
 		}else if(b == Mouse.buttonLeft){
 			/*
 			auto ent = world.entityList.create("Entity");
@@ -178,12 +174,12 @@ class Editor: Base {
 	}
 
 	override void onMouseMove(int x, int y){
-		auto dir = perspective.camera.screenToWorld([x, y], size);
+		auto dir = perspective.screenToWorld([x, y]);
 		Nullable!(int[3]) pos;
 		if(mode == Mode.add)
-			pos = spawnGrid.spawnPos(perspective.camera.position, dir);
+			pos = spawnGrid.spawnPos(perspective.transform.position, dir);
 		else if(mode == Mode.remove)
-			pos = spawnGrid.removePos(perspective.camera.position, dir);
+			pos = spawnGrid.removePos(perspective.transform.position, dir);
 		if(pos)
 			ghost = pos;
 	}

@@ -16,26 +16,26 @@ import
 __gshared:
 
 
-class BulletSystem: Thread {
+class BulletSystem {
 
 
 	BulletWorld* world;
 	protected {
 		Shape[string] shapes;
 		BulletObject[] objects;
+		bool isRunning = true;
 		double last;
 	}
 
 	double tickrate = 30;
 
 	this(){
-		isDaemon = true;
-		super(&loop);
-		//objects = new List!Physics;
 		world = createWorld();
-		//start();
 	}
 
+	void shutdown(){
+		isRunning = false;
+	}
 
 	BulletObject getPhysicsModel(string path){
 		Shape shape;
@@ -62,14 +62,10 @@ class BulletSystem: Thread {
 		destroyWorld(world);
 	}
 	
-	void tick(float ft){
-		tickWorld(world, ft);
-	}
-
 	void loop(){
 		last = ws.time.time.now();
 		while(isRunning){
-			double now = ws.time.time.now();
+			double now = time.now();
 			tickWorld(world, now - last);
 			ws.time.time.sleep(clamp(tickrate - (ws.time.time.now() - last), 0.0, 1.0/tickrate));
 			last = now;

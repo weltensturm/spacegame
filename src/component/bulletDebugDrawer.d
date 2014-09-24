@@ -37,7 +37,7 @@ class BulletDebugDrawer: Drawable {
 	}
 
 	void draw(WorldMatrix matrix){
-		mvp = matrix.getModelviewProjection();
+		//mvp = matrix.getModelviewProjection();
 		debugDrawWorld(world);
 	}
 

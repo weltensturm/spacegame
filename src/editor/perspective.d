@@ -9,7 +9,6 @@ import
 
 	ws.gl.render,
 
-	game.component.camera,
 	gui.engine,
 
 	editor.editor,
@@ -20,7 +19,6 @@ import
 
 class Perspective: Base {
 
-	Camera camera;
 	Noclip position;
 	bool forwardInput;
 	Editor creator;

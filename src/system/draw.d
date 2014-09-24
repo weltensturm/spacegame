@@ -27,22 +27,14 @@ import
 	ws.thread.loader,
 
 	gui.weaponSelection,
+	gui.worldPerspective,
 	matrixStack,
 	game.entity.entity,
 	game.system.system,
-	game.component.camera,
 	game.component.drawable,
 	game.component.transform,
 	window;
 
-
-__gshared:
-
-
-struct Screen {
-	double w;
-	double h;
-}
 
 struct Light {
 	float intensity = 100;
@@ -52,24 +44,9 @@ struct Light {
 
 class WorldMatrix: MatrixStack {
 
-	Camera delegate() camera;
-
-	this(Camera delegate() camera){
-		this.camera = camera;
-		super();
-	}
-
 	void reset(){
 		clear;
 		push(new Matrix!(4,4));
-	}
-
-	Matrix!(4,4) getModelviewProjection(){
-		return camera().getProjection() * camera().getView() * back();
-	}
-
-	Matrix!(4,4) getModelview(){
-		return camera().getView() * back();
 	}
 
 	Matrix!(3,3) getNormal(){
@@ -91,14 +68,15 @@ class Draw: System {
 		LoaderThread glLoader;
 		LoaderQueue mainLoader;
 		EntityManager ents;
+		WorldPerspective perspective;
 
 	}
 
-	Screen screen;
 	Material defaultMat;
 	WorldMatrix matrix;
 	Light light;
 	Render render;
+	Entity player;
 	
 	Model getModel(string path){
 		if(path in models)
@@ -108,15 +86,16 @@ class Draw: System {
 		return m;
 	}
 	
-	this(Window window, EntityManager ents, Camera delegate() camera){
+	this(Window window, EntityManager ents, Entity player, WorldPerspective perspective){
 		this.ents = ents;
-		matrix = new WorldMatrix(camera);
+		this.perspective = perspective;
+		matrix = new WorldMatrix;
 		defaultMat = new Material(
 			"error", ["singlelight": "forwardSpecular"], ["singlelight": "getSpecular"],
 			["vertex": gl.attributeVertex, "normal": gl.attributeNormal, "texture": gl.attributeTexture]
 		);
 		defaultMat.finish();
-		render = new Render({ return matrix.getModelviewProjection(); });
+		render = new Render({ return perspective.projection.getProjection * perspective.getView * matrix.back; });
 		auto sharedContext = window.shareContext;
 		glLoader = new LoaderThread({
 			window.makeCurrent(sharedContext);
@@ -148,10 +127,10 @@ class Draw: System {
 					continue;
 				Material m = (d.mat && d.mat.loaded ? d.mat : defaultMat);
 				m.use(
-					"matMVP", matrix.getModelviewProjection(),
-					"matMV", matrix.getModelview(),
-					"matM", matrix.back(),
-					"matN", matrix.getNormal(),
+					"matMVP", perspective.projection.getProjection*perspective.getView*matrix.back,
+					"matMV", perspective.getView*matrix.back,
+					"matM", matrix.back,
+					"matN", matrix.getNormal,
 					"lightPosition", light.position,
 					"diffuseColor", light.color,
 					"specularColor", light.color,
@@ -167,7 +146,10 @@ class Draw: System {
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
-		mainLoader.tick();
+		try
+			mainLoader.tick();
+		catch(Exception e)
+			Log.warning("DRAW MAIN LOADER ERROR: " ~ e.toString);
 	}
 
 }
