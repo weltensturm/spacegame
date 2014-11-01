@@ -25,14 +25,21 @@ class Options: Tabs {
 	this(Commands commands, Controls controls){
 		super(left);
 		offset = 0.7;
-		style.bg = [0.9, 0.9, 0.9, 0.8];
-		style.fg = [0,0,0,0.8];
+		style.bg = [0.9, 0.9, 0.9, 1];
+		style.fg = [0,0,0,1];
 		buttonStyle.bg = style.bg;
 		buttonStyle.fg = style.fg;
 		swap(buttonStyle.bg.normal, buttonStyle.bg.hover);
 		font = "Ubuntu-R";
-		addPage("controls", new ControlsMenu(controls));
-		addPage("graphics", new Lighting(commands));
+		auto c = new ControlsMenu(controls);
+		c.style.bg = style.bg;
+		c.style.fg = style.fg;
+		addPage("controls", c);
+
+		auto g = new Lighting(commands);
+		g.style.bg = style.bg;
+		g.style.fg = style.fg;
+		addPage("graphics", g);
 	}
 
 }

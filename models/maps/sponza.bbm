@@ -1,0 +1,115 @@
+
+16___Default {
+	diffuse maps/sponza/gi_flag.png
+}
+
+Material__25 {
+	diffuse maps/sponza/lion.png
+	bump maps/sponza/lion_ddn.png
+}
+
+Material__298 {
+	diffuse maps/sponza/background.png
+	bump maps/sponza/background_ddn.png
+}
+
+Material__47 {
+}
+
+Material__57 {
+	diffuse maps/sponza/vase_plant.png
+	alpha maps/sponza/vase_plant_mask.png
+}
+
+arch {
+	diffuse maps/sponza/sponza_arch_diff.png
+}
+
+bricks {
+	diffuse maps/sponza/spnza_bricks_a_diff.png
+	bump maps/sponza/spnza_bricks_a_diff.png
+}
+
+ceiling {
+	diffuse maps/sponza/sponza_ceiling_a_diff.png
+}
+
+chain {
+	diffuse maps/sponza/chain_texture.png
+	bump maps/sponza/chain_texture_ddn.png
+	alpha maps/sponza/chain_texture_mask.png
+}
+
+column_a {
+	diffuse maps/sponza/sponza_column_a_diff.png
+	bump maps/sponza/sponza_column_a_ddn.png
+}
+
+column_b {
+	diffuse maps/sponza/sponza_column_b_diff.png
+	bump maps/sponza/sponza_column_b_ddn.png
+}
+
+column_c {
+	diffuse maps/sponza/sponza_column_c_diff.png
+	bump maps/sponza/sponza_column_c_ddn.png
+}
+
+details {
+	diffuse maps/sponza/sponza_details_diff.png
+}
+
+fabric_a {
+	diffuse maps/sponza/sponza_fabric_diff.png
+}
+
+fabric_c {
+	diffuse maps/sponza/sponza_curtain_diff.png
+}
+
+fabric_d {
+	diffuse maps/sponza/sponza_fabric_blue_diff.png
+}
+
+fabric_e {
+	diffuse maps/sponza/sponza_fabric_green_diff.png
+}
+
+fabric_f {
+	diffuse maps/sponza/sponza_curtain_green_diff.png
+}
+
+fabric_g {
+	diffuse maps/sponza/sponza_curtain_blue_diff.png
+}
+
+flagpole {
+	diffuse maps/sponza/sponza_flagpole_diff.png
+}
+
+floor {
+	diffuse maps/sponza/sponza_floor_a_diff.png
+}
+
+leaf {
+	diffuse maps/sponza/sponza_thorn_diff.png
+	bump maps/sponza/sponza_thorn_ddn.png
+	alpha maps/sponza/sponza_thorn_mask.png
+}
+
+roof {
+	diffuse maps/sponza/sponza_roof_diff.png
+}
+
+vase {
+	diffuse maps/sponza/vase_dif.png
+}
+
+vase_hanging {
+	diffuse maps/sponza/vase_hanging.png
+}
+
+vase_round {
+	diffuse maps/sponza/vase_round.png
+	bump maps/sponza/vase_round_ddn.png
+}

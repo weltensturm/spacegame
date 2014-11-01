@@ -9,8 +9,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/gi_flag.tga
-map_Ka maps/sponza/gi_flag.tga
+map_Kd maps/sponza/gi_flag.png
+map_Ka maps/sponza/gi_flag.png
 
 newmtl Material__25
 Ns 7.843137
@@ -20,9 +20,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/lion.tga
-map_Bump maps/sponza/lion_ddn.tga
-map_Ka maps/sponza/lion.tga
+map_Kd maps/sponza/lion.png
+map_Bump maps/sponza/lion_ddn.png
+map_Ka maps/sponza/lion.png
 
 newmtl Material__298
 Ns 7.843137
@@ -32,9 +32,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/background.tga
-map_Bump maps/sponza/background_ddn.tga
-map_Ka maps/sponza/background.tga
+map_Kd maps/sponza/background.png
+map_Bump maps/sponza/background_ddn.png
+map_Ka maps/sponza/background.png
 
 newmtl Material__47
 Ns 7.843137
@@ -53,9 +53,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/vase_plant.tga
-map_Ka maps/sponza/vase_plant.tga
-map_d maps/sponza/vase_plant_mask.tga
+map_Kd maps/sponza/vase_plant.png
+map_Ka maps/sponza/vase_plant.png
+map_d maps/sponza/vase_plant_mask.png
 
 newmtl arch
 Ns 7.843137
@@ -65,8 +65,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_arch_diff.tga
-map_Ka maps/sponza/sponza_arch_diff.tga
+map_Kd maps/sponza/sponza_arch_diff.png
+map_Ka maps/sponza/sponza_arch_diff.png
 
 newmtl bricks
 Ns 7.843137
@@ -76,9 +76,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/spnza_bricks_a_diff.tga
-map_Bump maps/sponza/spnza_bricks_a_diff.tga
-map_Ka maps/sponza/spnza_bricks_a_diff.tga
+map_Kd maps/sponza/spnza_bricks_a_diff.png
+map_Bump maps/sponza/spnza_bricks_a_diff.png
+map_Ka maps/sponza/spnza_bricks_a_diff.png
 
 newmtl ceiling
 Ns 7.843137
@@ -88,8 +88,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_ceiling_a_diff.tga
-map_Ka maps/sponza/sponza_ceiling_a_diff.tga
+map_Kd maps/sponza/sponza_ceiling_a_diff.png
+map_Ka maps/sponza/sponza_ceiling_a_diff.png
 
 newmtl chain
 Ns 7.843137
@@ -99,10 +99,10 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/chain_texture.tga
-map_Bump maps/sponza/chain_texture_ddn.tga
-map_Ka maps/sponza/chain_texture.tga
-map_d maps/sponza/chain_texture_mask.tga
+map_Kd maps/sponza/chain_texture.png
+map_Bump maps/sponza/chain_texture_ddn.png
+map_Ka maps/sponza/chain_texture.png
+map_d maps/sponza/chain_texture_mask.png
 
 newmtl column_a
 Ns 7.843137
@@ -112,9 +112,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_column_a_diff.tga
-map_Bump maps/sponza/sponza_column_a_ddn.tga
-map_Ka maps/sponza/sponza_column_a_diff.tga
+map_Kd maps/sponza/sponza_column_a_diff.png
+map_Bump maps/sponza/sponza_column_a_ddn.png
+map_Ka maps/sponza/sponza_column_a_diff.png
 
 newmtl column_b
 Ns 7.843137
@@ -124,9 +124,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_column_b_diff.tga
-map_Bump maps/sponza/sponza_column_b_ddn.tga
-map_Ka maps/sponza/sponza_column_b_diff.tga
+map_Kd maps/sponza/sponza_column_b_diff.png
+map_Bump maps/sponza/sponza_column_b_ddn.png
+map_Ka maps/sponza/sponza_column_b_diff.png
 
 newmtl column_c
 Ns 7.843137
@@ -136,9 +136,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_column_c_diff.tga
-map_Bump maps/sponza/sponza_column_c_ddn.tga
-map_Ka maps/sponza/sponza_column_c_diff.tga
+map_Kd maps/sponza/sponza_column_c_diff.png
+map_Bump maps/sponza/sponza_column_c_ddn.png
+map_Ka maps/sponza/sponza_column_c_diff.png
 
 newmtl details
 Ns 7.843137
@@ -148,8 +148,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_details_diff.tga
-map_Ka maps/sponza/sponza_details_diff.tga
+map_Kd maps/sponza/sponza_details_diff.png
+map_Ka maps/sponza/sponza_details_diff.png
 
 newmtl fabric_a
 Ns 7.843137
@@ -159,8 +159,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_fabric_diff.tga
-map_Ka maps/sponza/sponza_fabric_diff.tga
+map_Kd maps/sponza/sponza_fabric_diff.png
+map_Ka maps/sponza/sponza_fabric_diff.png
 
 newmtl fabric_c
 Ns 7.843137
@@ -170,8 +170,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_curtain_diff.tga
-map_Ka maps/sponza/sponza_curtain_diff.tga
+map_Kd maps/sponza/sponza_curtain_diff.png
+map_Ka maps/sponza/sponza_curtain_diff.png
 
 newmtl fabric_d
 Ns 7.843137
@@ -181,8 +181,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_fabric_blue_diff.tga
-map_Ka maps/sponza/sponza_fabric_blue_diff.tga
+map_Kd maps/sponza/sponza_fabric_blue_diff.png
+map_Ka maps/sponza/sponza_fabric_blue_diff.png
 
 newmtl fabric_e
 Ns 7.843137
@@ -192,8 +192,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_fabric_green_diff.tga
-map_Ka maps/sponza/sponza_fabric_green_diff.tga
+map_Kd maps/sponza/sponza_fabric_green_diff.png
+map_Ka maps/sponza/sponza_fabric_green_diff.png
 
 newmtl fabric_f
 Ns 7.843137
@@ -203,8 +203,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_curtain_green_diff.tga
-map_Ka maps/sponza/sponza_curtain_green_diff.tga
+map_Kd maps/sponza/sponza_curtain_green_diff.png
+map_Ka maps/sponza/sponza_curtain_green_diff.png
 
 newmtl fabric_g
 Ns 7.843137
@@ -214,8 +214,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_curtain_blue_diff.tga
-map_Ka maps/sponza/sponza_curtain_blue_diff.tga
+map_Kd maps/sponza/sponza_curtain_blue_diff.png
+map_Ka maps/sponza/sponza_curtain_blue_diff.png
 
 newmtl flagpole
 Ns 7.843137
@@ -225,8 +225,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_flagpole_diff.tga
-map_Ka maps/sponza/sponza_flagpole_diff.tga
+map_Kd maps/sponza/sponza_flagpole_diff.png
+map_Ka maps/sponza/sponza_flagpole_diff.png
 
 newmtl floor
 Ns 7.843137
@@ -236,8 +236,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_floor_a_diff.tga
-map_Ka maps/sponza/sponza_floor_a_diff.tga
+map_Kd maps/sponza/sponza_floor_a_diff.png
+map_Ka maps/sponza/sponza_floor_a_diff.png
 
 newmtl leaf
 Ns 7.843137
@@ -247,10 +247,10 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_thorn_diff.tga
-map_Bump maps/sponza/sponza_thorn_ddn.tga
-map_Ka maps/sponza/sponza_thorn_diff.tga
-map_d maps/sponza/sponza_thorn_mask.tga
+map_Kd maps/sponza/sponza_thorn_diff.png
+map_Bump maps/sponza/sponza_thorn_ddn.png
+map_Ka maps/sponza/sponza_thorn_diff.png
+map_d maps/sponza/sponza_thorn_mask.png
 
 newmtl roof
 Ns 7.843137
@@ -260,8 +260,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/sponza_roof_diff.tga
-map_Ka maps/sponza/sponza_roof_diff.tga
+map_Kd maps/sponza/sponza_roof_diff.png
+map_Ka maps/sponza/sponza_roof_diff.png
 
 newmtl vase
 Ns 7.843137
@@ -271,8 +271,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/vase_dif.tga
-map_Ka maps/sponza/vase_dif.tga
+map_Kd maps/sponza/vase_dif.png
+map_Ka maps/sponza/vase_dif.png
 
 newmtl vase_hanging
 Ns 7.843137
@@ -282,8 +282,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/vase_hanging.tga
-map_Ka maps/sponza/vase_hanging.tga
+map_Kd maps/sponza/vase_hanging.png
+map_Ka maps/sponza/vase_hanging.png
 
 newmtl vase_round
 Ns 7.843137
@@ -293,6 +293,6 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd maps/sponza/vase_round.tga
-map_Bump maps/sponza/vase_round_ddn.tga
-map_Ka maps/sponza/vase_round.tga
+map_Kd maps/sponza/vase_round.png
+map_Bump maps/sponza/vase_round_ddn.png
+map_Ka maps/sponza/vase_round.png

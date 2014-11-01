@@ -33,11 +33,11 @@ class BulletDebugDrawer: Drawable {
 		batch.add([0,0,0]);
 		batch.add([1,1,1]);
 		batch.finish();
-		shader = Shader.load("3d_line", gl.attributeVertex, "vertex");
+		shader = Shader.load("3d_line", [gl.attributeVertex: "vertex"]);
 	}
 
-	void draw(WorldMatrix matrix){
-		mvp = matrix.getModelviewProjection();
+	void draw(ModelMatrix matrix){
+		//mvp = matrix.getModelviewProjection();
 		debugDrawWorld(world);
 	}
 

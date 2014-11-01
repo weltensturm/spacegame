@@ -35,7 +35,9 @@ static this(){
 		5000 + Mouse.buttonLeft: "Mouse Left",
 		5000 + Mouse.buttonRight: "Mouse Right",
 		5000 + Mouse.wheelUp: "Mouse Wheel Up",
-		5000 + Mouse.wheelDown: "Mouse Wheel Down"
+		5000 + Mouse.wheelDown: "Mouse Wheel Down",
+		5500: "Mouse X",
+		5501: "Mouse Y"
 	];
 }
 
@@ -60,6 +62,7 @@ class Controls {
 	string[string] bindings;
 	const string path;
 	Commands commands;
+	void delegate(string,float) capture;
 	
 	this(string path, Commands commands){
 		this.path = path;
@@ -68,6 +71,7 @@ class Controls {
 
 
 	void bind(string action, string key, bool shouldSave=true){
+		assert(action.length);
 		foreach(k,i; bindings)
 			if(i == action){
 				bindings.remove(k);
@@ -79,20 +83,42 @@ class Controls {
 	}
 
 	void keyPress(int key, bool pressed){
+		if(capture){
+			capture(getKeyName(key), pressed ? 1 : 0);
+			capture = null;
+		}
 		auto keyId = getKeyName(key);
 		if(keyId in bindings){
-			if(bindings[keyId] !in commands.commands)
-				exception(tostring("\"%\" is not a registered command", bindings[keyId]));
-			commands.run(bindings[keyId], pressed ? 1 : 0);
+			string bind = bindings[keyId];
+			bool minus = false;
+			if(bind[0] == '-'){
+				minus = true;
+				bind = bind[1..$];
+			}
+			if(bind !in commands.commands)
+				Log.warning(tostring("\"%\" is not a registered command", bind));
+			else
+				commands.run(bind, pressed ? (minus?-1:1) : 0);
 		}
 	}
 
 	void input(int id, float value){
+		if(capture){
+			capture(getKeyName(id), value);
+			capture = null;
+		}
 		auto keyId = getKeyName(id);
 		if(keyId in bindings){
-			if(bindings[keyId] !in commands.commands)
-				exception(tostring("\"%\" is not a registered command", bindings[keyId]));
-			commands.run(bindings[keyId], value);
+			string bind = bindings[keyId];
+			bool minus = false;
+			if(bind[0] == '-'){
+				minus = true;
+				bind = bind[1..$];
+			}
+			if(bind !in commands.commands)
+				Log.warning(tostring("\"%\" is not a registered command", bind));
+			else
+				commands.run(bind, value);
 		}
 	}
 
@@ -101,6 +127,10 @@ class Controls {
 			if(a == action)
 				return k;
 		return "";
+	}
+
+	void captureNext(void delegate(string,float) f){
+		capture = f;
 	}
 
 	void load(){

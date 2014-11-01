@@ -1,0 +1,11 @@
+#version 130
+
+in vec4 vertex;
+
+uniform mat4 mvp;
+uniform float scale;
+
+void main(){          
+	gl_Position = mvp*(vertex*vec4(scale,scale,scale,1));
+}
+

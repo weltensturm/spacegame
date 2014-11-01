@@ -2,6 +2,7 @@ module game.system.voxelHeap;
 
 
 import
+	std.algorithm,
 	ws.nullable,
 	ws.gl.render,
 	ws.gl.material,
@@ -14,6 +15,13 @@ import
 	gui.engine;
 
 
+void remove(T)(T[] array, T obj){
+	for(int i=0; i < array.length; i++)
+		if(array[i] == obj)
+			array = array[0..i] ~ array[i+1..$];
+}
+
+
 class VoxelHeap: System {
 
 	alias int[3] VoxelPos;
@@ -23,32 +31,18 @@ class VoxelHeap: System {
 		int width = 10;
 		foreach(x; -width/2..width/2+1)
 			foreach(y; -width/2..width/2+1){
-				/+ TODO: add cubes
-				auto cube = world.entityList.create("UniformCube");
-				cube.setPos(vec(x, y, 0));
-				cubes[[x,y,0]] = cube;
-				+/
+				cubes ~= [x,y,0];
 			}
 	}
 
 	void spawn(VoxelPos pos){
-		/+
-		if(pos !in cubes){
-			TODO: add cubes
-			auto cube = world.entityList.create("UniformCube");
-			cube.setPos(vec(pos));
-			cubes[pos] = cube;
-		}
-		+/
+		if(!cubes.canFind(pos))
+			cubes ~= pos;
 	}
 
 	void remove(VoxelPos pos){
-		/+
-		if(pos in cubes){
-			cubes[pos].remove;
+		if(cubes.canFind(pos))
 			cubes.remove(pos);
-		}
-		+/
 	}
 
 	LineCubeResult trace(Vector!3 start, Vector!3 dir){

@@ -2,24 +2,29 @@ module editor.editor;
 
 import
 	std.string,
+	std.algorithm,
 
 	ws.nullable,
 	ws.log,
 	ws.math,
+	ws.gl.gl,
 	ws.gl.draw,
 	ws.gl.material,
+	ws.gl.render,
+	ws.gl.batch,
 	ws.gui.base,
 	ws.gui.style,
 	ws.gui.list,
 	ws.gui.button,
 	ws.gui.input,
+	ws.gui.inputField,
 	ws.gl.model,
 
 	window,
 	gui.engine,
+	gui.worldPerspective,
 
 	editor.spawner,
-	editor.perspective,
 	game.commands,
 	game.component.noclip,
 	game.system.draw,
@@ -29,53 +34,65 @@ import
 enum Mode { add, remove, select }
 
 
+alias IntPos = int[3];
+
+
 class Editor: Base {
 
 	protected {
 		List left;
 		List right;
 		Button spawnerButton;
-		Perspective perspective;
+		WorldPerspective perspective;
+		Render render;
 	}
 
 	Mode mode;
 	Vector!3[] points;
-	int[3] ghost;
-	int[3] start;
+	IntPos[] ghost;
+	IntPos ghostStart;
 	float[4] ghostColor;
 	VoxelHeap spawnGrid;
-	Engine engine;
+	Model cube;
+	bool drawGhost;
+	bool dragging;
 
-	this(Engine engine, Commands commands){
-		this.engine = engine;
-		style.bg = [0.3,0.3,0.3,1];
+	void savePopup(){
+		auto popup = add!List;
+		popup.add!InputField;
+		auto save = popup.add!Button("save");
+		save.leftClick ~= { children.remove(popup); };
+		auto cancel = popup.add!Button("cancel");
+		cancel.leftClick ~= { children.remove(popup); };
+		popup.setSize(300, 300);
+		popup.setLocalPos(size.x/2-150, size.y/2-150);
+	}
+
+	this(WorldPerspective perspective, Render render, Commands commands){
+		this.perspective = perspective;
+		this.render = render;
+
+		style.bg = [0.3, 0.3, 0.3, 1];
 		left = add!List;
 		left.style = style;
-		left.setSize(200,0);
+		left.setSize(200, 0);
 
-		perspective = add!Perspective(this);
+		cube = new Model("uniform_cube.obj");
 
-		commands.add("editor_perspective_speed_x", (float n){
-			perspective.position.velocityTarget[0] = n;
-		});
-		commands.add("editor_perspective_speed_y", (float n){
-			perspective.position.velocityTarget[1] = n;
-		});
-		commands.add("editor_perspective_speed_z", (float n){
-			perspective.position.velocityTarget[2] = n;
-		});
-		commands.add("editor_perspective_turn_pitch", (float n){
-			perspective.camera.angle.rotate(-pow(n/10.0, 1.2), 0,0,1);
-		});
-		commands.add("editor_perspective_turn_yaw", (float n){
-			perspective.camera.angle.rotate(pow(n/10.0, 1.2), -perspective.camera.angle.right());
-		});
 		commands.add("editor_mode_add", (){
-			setMode(Mode.add);
+			if(hasFocus)
+				setMode(Mode.add);
 		});
+
 		commands.add("editor_mode_remove", (){
-			setMode(Mode.remove);
+			if(hasFocus)
+				setMode(Mode.remove);
 		});
+
+		foreach(x; 0..2)
+			foreach(y; 0..2)
+				foreach(z; 0..2)
+					points ~= vec(x-0.5, y-0.5, z-0.5);
 
 		spawnGrid = new VoxelHeap();
 
@@ -90,14 +107,11 @@ class Editor: Base {
 		auto removeButton = left.add!Button("remove");
 		removeButton.leftClick ~= { setMode(Mode.remove); };
 
-		setTop(perspective);
+		auto saveButton = left.add!Button("save");
+		saveButton.leftClick ~= { savePopup(); };
+		auto loadButton = left.add!Button("load");
 
-		foreach(x; 0..2)
-			foreach(y; 0..2)
-				foreach(z; 0..2)
-					points ~= vec(x-0.5, y-0.5, z-0.5);
-					
-		//world.draw ~= &draw3d;
+		perspective.drawSystem.onDraw ~= &draw3d;
 	}
 
 
@@ -113,6 +127,7 @@ class Editor: Base {
 	override void onKeyboard(Keyboard.key key, bool pressed){
 		if(key == Keyboard.escape)
 			hide;
+		super.onKeyboard(key, pressed);
 	}
 
 
@@ -124,68 +139,92 @@ class Editor: Base {
 		spawner.setPos(spawnerButton.pos.x, spawnerButton.pos.y - 400);
 		spawner.setSize(spawnerButton.size.x, 400);
 		+/
-
-
-		Perspective.setSize(w - left.size.x, h);
-		Perspective.setPos(left.pos.x + left.size.x, 0);
 	}
 
-
-	void spawn(string model){
-		Log.info("Spawning " ~ model);
-	}
 
 	private void drawCube(int[3] pos){
-		/+
 		foreach(cbegin; points)
 			foreach(cend; points)
 				if(cend.x == cbegin.x || cend.y == cbegin.y || cend.z == cbegin.z)
-					engine.renderer.line(vec(pos) + cbegin, vec(pos) + cend);
-		+/
+					render.line(vec(pos) + cbegin, vec(pos) + cend);
 	}
 
-	void draw3d(WorldMatrix, Light light, Material defaultMat){
-		/+
-		engine.renderer.color = [ghostColor[0]*0.5, ghostColor[1]*0.5, ghostColor[2]*0.5, ghostColor[3]*0.5];
-		drawCube(start);
-		engine.renderer.color = ghostColor;
-		drawCube(ghost);
-		+/
+	void draw3d(ModelMatrix modelMatrix, Matrix!(4,4) projectionMatrix, Matrix!(4,4) viewMatrix){
+		foreach(pos; spawnGrid.cubes){
+			modelMatrix.push;
+			modelMatrix.translate(Vector!3.from(pos));
+			foreach(object; cube.data){
+				object.mat.use(
+					"matMVP", projectionMatrix*viewMatrix*modelMatrix.back,
+					"matMV", viewMatrix*modelMatrix.back,
+					"matV", viewMatrix.inverse,
+					"matM", modelMatrix.back,
+					"matN", modelMatrix.getNormal,
+					"lightPosition", perspective.transform.position,
+					"diffuseColor", Vector!3(1,1,1),
+					"specularColor", Vector!3(1,1,1),
+					"ambientColor", Vector!3(1,1,1)/10,
+					"lumen", 200.0f
+				);
+				object.batch.draw();
+			}
+			modelMatrix.pop;
+		}
+		render.color = ghostColor;
+		if(drawGhost){
+			foreach(pos; ghost)
+				drawCube(pos);
+		}
 	}
 
-	void worldMouseButton(Mouse.button b, bool pressed){
+	override void onMouseButton(Mouse.button b, bool pressed, int x, int y){
 		if(b == Mouse.buttonRight && pressed){
-			perspective.forwardInput = !perspective.forwardInput;
+			//perspective.forwardInput = !perspective.forwardInput;
 			//world.onMouseFocus(perspective.forwardInput);
-			setCursor(perspective.forwardInput ? Mouse.cursor.none : Mouse.cursor.inherit);
-		}else if(b == Mouse.buttonLeft){
+			//setCursor(perspective.forwardInput ? Mouse.cursor.none : Mouse.cursor.inherit);
+		}else if(b == Mouse.buttonLeft && drawGhost){
 			/*
 			auto ent = world.entityList.create("Entity");
 			ent.setModel("20cmsphere.obj");
 			ent.setPos(ghost.getPos());
 			*/
-			if(pressed){
-				start = ghost;
-			}else{
-				if(mode == Mode.add)
-					spawnGrid.spawn(start);
-				else if(mode == Mode.select)
-					{}//spawnGrid.select;
-				else if(mode == Mode.remove)
-					spawnGrid.remove(start);
+			dragging = pressed;
+			if(!pressed){
+				foreach(pos; ghost){
+					if(mode == Mode.add)
+						spawnGrid.spawn(pos);
+					else if(mode == Mode.select)
+						{}//spawnGrid.select;
+					else if(mode == Mode.remove)
+						spawnGrid.remove(pos);
+				}
 			}
 		}
+		super.onMouseButton(b, pressed, x, y);
 	}
 
 	override void onMouseMove(int x, int y){
-		auto dir = perspective.camera.screenToWorld([x, y], size);
+		auto dir = perspective.screenToWorld([x, y]);
 		Nullable!(int[3]) pos;
 		if(mode == Mode.add)
-			pos = spawnGrid.spawnPos(perspective.camera.position, dir);
+			pos = spawnGrid.spawnPos(perspective.transform.position, dir);
 		else if(mode == Mode.remove)
-			pos = spawnGrid.removePos(perspective.camera.position, dir);
-		if(pos)
-			ghost = pos;
+			pos = spawnGrid.removePos(perspective.transform.position, dir);
+		if(pos){
+			ghost = [];
+			if(!dragging)
+				ghostStart = pos;
+			for(int cx = min(ghostStart[0], pos[0]); cx <= max(ghostStart[0], pos[0]); cx++)
+				for(int cy = min(ghostStart[1], pos[1]); cy <= max(ghostStart[1], pos[1]); cy++)
+					for(int cz = min(ghostStart[2], pos[2]); cz <= max(ghostStart[2], pos[2]); cz++)
+						ghost ~= [cx, cy, cz];
+			drawGhost = true;
+		}else
+			drawGhost = false;
+		super.onMouseMove(x, y);
 	}
 
 }
+
+
+

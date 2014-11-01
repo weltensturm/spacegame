@@ -44,7 +44,7 @@ class Console: Base {
 		};
 		textBox.setFont("UbuntuMono-R", 11);
 		setTop(textBox);
-		commands.add("open_console", {
+		commands.add("toggle_console", {
 			hidden ? show() : hide();
 		});
 

@@ -6,10 +6,10 @@ in vec3 normal;
 uniform mat4 matM;
 uniform mat3 matN;
 
-smooth out vec3 varyingNormal;
+smooth out vec3 normalDir;
 smooth out vec3 worldPos;
 
 void forwardSpecular(){
-	varyingNormal = matN*normal;
+	normalDir = matN*normal;
 	worldPos = (matM*vertex).xyz;
 }

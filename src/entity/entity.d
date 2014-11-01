@@ -42,11 +42,12 @@ class EntityManager {
 		Entity[] result;
 		string[] names = typenames!Args;
 		foreach(e; entityList){
-			bool valid = false;
+			bool valid = true;
 			foreach(name; names){
-				if(name !in e.components)
+				if(name !in e.components){
+					valid = false;
 					break;
-				valid = true;
+				}
 			}
 			if(valid)
 				result ~= e;

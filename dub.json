@@ -2,15 +2,17 @@
 
 	"name" : "engine",
 	
-	"description" : "Space Shit",
+	"description" : "Space Game",
 	
 	"targetFileName": "engine",
 	"targetPath": "bin",
+	"workingDirectory": "bin",
 	"targetType": "executable",
 	
 	"dependencies" : {
 		"derelict-gl3": "~master",
-		"derelict-ft": "~master"
+		"derelict-ft": "~master",
+		"derelict-fi": "~master"
 	},
 
 	"includePaths": [
@@ -19,14 +21,13 @@
 
 	"sourcePaths": [
 		"src",
-		"../X11",
 		"../ws"
 	],
 
 	"excludedSourceFiles": [
 		"../ws/physics/ode/*"
 	],
-	
+
 	"libs-posix": ["X11", "GL"],
 
 	"buildOptions": [

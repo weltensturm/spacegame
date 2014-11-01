@@ -10,46 +10,44 @@ import
 	ws.list,
 	ws.time,
 	ws.math,
+	game.entity.entity,
+	game.component.bulletPhysics,
+	game.component.transform,
 	gui.engine;
 
 
 __gshared:
 
 
-class BulletSystem: Thread {
+class BulletWorld {
 
-
-	BulletWorld* world;
+	ws.physics.bullet.cbullet.BulletWorld* world;
 	protected {
 		Shape[string] shapes;
 		BulletObject[] objects;
+		EntityManager ents;
+		bool isRunning = true;
 		double last;
 	}
 
-	double tickrate = 30;
+	double tickrate = 60;
 
-	this(){
-		isDaemon = true;
-		super(&loop);
-		//objects = new List!Physics;
+	this(EntityManager ents){
+		this.ents = ents;
 		world = createWorld();
-		//start();
 	}
 
+	void shutdown(){
+		isRunning = false;
+	}
 
-	BulletObject getPhysicsModel(string path){
+	BulletObject createObject(string path){
 		Shape shape;
-		auto phpath = path[0..$-4] ~ "_ph.obj";
-		if(phpath in shapes)
-			shape = shapes[phpath];
+		if(path in shapes)
+			shape = shapes[path];
 		else{
-			if(exists("models/" ~ phpath))
-				shape = new Shape(phpath);
-			else{
-				shape = new Shape(path);
-				Log.warning("Using view model as physics model for " ~ path);
-			}
-			shapes[phpath] = shape;
+			shape = new Shape(path);
+			shapes[path] = shape;
 		}
 		auto o = new BulletObject(world, shape);
 		o.finish();
@@ -62,18 +60,36 @@ class BulletSystem: Thread {
 		destroyWorld(world);
 	}
 	
-	void tick(float ft){
-		tickWorld(world, ft);
-	}
-
 	void loop(){
-		last = ws.time.time.now();
-		while(isRunning){
-			double now = ws.time.time.now();
-			tickWorld(world, now - last);
-			ws.time.time.sleep(clamp(tickrate - (ws.time.time.now() - last), 0.0, 1.0/tickrate));
-			last = now;
-		}
+		try {
+			last = ws.time.time.now();
+			while(isRunning){
+				double now = time.now();
+				Vector!3[Transform] positions;
+				Quaternion[Transform] angles;
+				foreach(bullet, transform; ents.iterate!(BulletPhysics,Transform)){
+					if(bullet.object){
+						bullet.object.setPos(transform.position);
+						bullet.object.setAngle(transform.angle);
+						positions[transform] = transform.position;
+						angles[transform] = transform.angle;
+
+					}
+				}
+				tickWorld(world, now - last);
+				foreach(bullet, transform; ents.iterate!(BulletPhysics,Transform)){
+					if(bullet.object){
+						if(transform in positions && positions[transform] == transform.position)
+							transform.position = bullet.object.getPos();
+						if(transform in angles && angles[transform] == transform.angle)
+							transform.angle = bullet.object.getAngle();
+					}
+				}
+				ws.time.time.sleep(clamp(tickrate - (ws.time.time.now() - last), 0.0, 1.0/tickrate));
+				last = now;
+			}
+		}catch(Throwable t)
+			Log.error(t.toString());
 	}
 
 	auto trace(float[3] start, float[3] end){

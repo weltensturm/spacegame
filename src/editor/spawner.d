@@ -28,7 +28,7 @@ class Spawner: Grid {
 	void addEntry(string n){
 		auto b = add!SpawnButton(n);
 		b.leftClick ~= {
-			creator.spawn(n);
+			//creator.spawn(n);
 		};
 	}
 
