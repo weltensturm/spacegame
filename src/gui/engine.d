@@ -90,12 +90,10 @@ class Engine: Base {
 			editor.hidden ? editor.show : editor.hide;
 		});
 
-		/+
 		auto sponza = ents.create!(Drawable,Transform,BulletPhysics);
-		sponza.get!Drawable.model = new Model("maps/sponza.obj");
+		sponza.get!Drawable.model = perspective.drawSystem.getModel("maps/sponza.obj");
 		sponza.get!BulletPhysics.object = physicsSystem.createObject("maps/sponza_ph.obj");
 		sponza.get!BulletPhysics.object.setMass(0);
-		+/
 
 		//auto bulletDebug = new DebugDrawer(physicsSystem.world);
 	}

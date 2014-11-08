@@ -35,7 +35,7 @@ class Menu: Tabs {
 		addPage("quit", new Base).button.leftClick ~= {
 			commands.run("exit");
 		};
-		commands.add("menu_toggle", {
+		commands.add("toggle_menu", {
 			hidden ? show() : hide();
 		});
 	}

@@ -139,23 +139,6 @@ class Draw: System {
 		//directionalPass = Shader.load("deferred_light_directional", [gl.attributeVertex: "vertex"], [GBuffer.LIGHT: "frag"]);
 		shaderFinalize = Shader.load("deferred_finalize", [gl.attributeVertex: "vertex"]);
 
-		/+
-		auto light = PointLight();
-		light.diffuseIntensity = 0.2;
-		light.color = [1,0.5,0.5];
-        light.position = Vector!3(0, 1.5, 5);
-        light.diffuseIntensity = 1;
-		light.attenuationConstant = 0;
-        light.attenuationLinear = 0;
-        light.attenuationExp = 0.1;
-		pointLights ~= light;
-
-		light.position = Vector!3(15, 1.5, 5);
-		light.attenuationExp = 0.05;
-		light.color = [1,1,1];
-		pointLights ~= light;
-		+/
-
 		lightSphere = new Model("light_sphere.obj");
 
 		screenQuad = new Batch;
@@ -165,6 +148,8 @@ class Draw: System {
 		screenQuad.add([1, -1, 0]);
 		screenQuad.add([1, 1, 0]);
 		screenQuad.finish;
+
+		lastMatFinish = 0;
 
 	}
 
@@ -177,7 +162,6 @@ class Draw: System {
 
 		float[3] screen = [width, height, 0];
 
-		// geom pass
 		if(rebuildFramebuffer){
 			gbuffer.destroy;
 			gbuffer = new GBuffer(width, height);
@@ -209,8 +193,8 @@ class Draw: System {
 			foreach(d; drawable.model.data){
 				if(!d.batch)
 					continue;
-				if(d.mat)
-					d.mat.activateTextures;
+				if(d.material)
+					d.material.activateTextures;
 				d.batch.draw;
 			}
 		}
@@ -224,6 +208,7 @@ class Draw: System {
 		glDisable(GL_CULL_FACE);
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		gbuffer.bindDepth(5);
  		foreach(transform, light; ents.iterate!(Transform,PointLight)){
 			shaderLightPoint.use(
@@ -242,19 +227,13 @@ class Draw: System {
 					"attenConstant", light.attenuationConstant,
 					"attenLinear", light.attenuationLinear,
 					"attenExp", light.attenuationExp,
-					"specPower", 1.0f,
-					"specIntensity", 1.0f 
+					"specPower", 0.2f,
+					"specIntensity", 0.2f
 			);
 			screenQuad.draw;
 		}
 
-		/+
-		// directional light pass
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
-		directionalPass.use("screen", screen);
-		+/
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		gbuffer.bindTextures;
 		lightBuffer.read([5: 0]);
@@ -269,22 +248,17 @@ class Draw: System {
 		);
         screenQuad.draw;
 
-		// draw to screen
-		//gbuffer.bindFinal;
-        //glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
 		blit(GBuffer.DIFFUSE, 20, 20, 300);
 		blit(GBuffer.NORMAL, 340, 20, 300);
 		blit(GBuffer.TEXCOORD, 660, 20, 300);
 		lightBuffer.blit(0, 980, 20, 300);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
 		try {
-			if(lastMatFinish+5 < time.now){
+			if(lastMatFinish < time.now){
 				mainLoader.tick();
 				lastMatFinish = time.now;
 			}

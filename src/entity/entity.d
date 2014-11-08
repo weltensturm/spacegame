@@ -106,9 +106,3 @@ private string[] typenames(T, Args...)(){
 }
 
 
-T get(T)(T[string] map, string key, T def){
-	if(key in map)
-		return map[key];
-	return def;
-}
-

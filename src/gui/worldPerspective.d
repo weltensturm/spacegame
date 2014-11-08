@@ -45,6 +45,7 @@ class WorldPerspective: Base {
 		glViewport(0,0,size[0],size[1]);
 		drawSystem.draw();
 		glViewport(0,0,size[0],size[1]);
+		glEnable(GL_BLEND);
 	}
 
 

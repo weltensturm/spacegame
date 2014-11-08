@@ -10,7 +10,7 @@
 "look_x" "Mouse X"
 "-look_y" "Mouse Y"
 "-move_z" "shift"
-"open_console" "224"
+"toggle_console" "224"
 "weapon_next" "Mouse Wheel Up"
 "weapon_fire_alt" "Mouse Right"
 "-move_y" "s"

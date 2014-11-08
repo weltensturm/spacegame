@@ -154,7 +154,7 @@ class Editor: Base {
 			modelMatrix.push;
 			modelMatrix.translate(Vector!3.from(pos));
 			foreach(object; cube.data){
-				object.mat.use(
+				object.material.use(
 					"matMVP", projectionMatrix*viewMatrix*modelMatrix.back,
 					"matMV", viewMatrix*modelMatrix.back,
 					"matV", viewMatrix.inverse,

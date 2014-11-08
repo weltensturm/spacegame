@@ -12,6 +12,5 @@ out vec4 col;
 void main(){
 	vec2 xy = gl_FragCoord.xy/screen.xy;
 	vec4 light = texture(mapLight, xy);
-	light.a = 1;
-    col = texture(mapDiffuse, xy)*light;
+    col = texture(mapDiffuse, xy)*vec4(light.rgb*light.a, 1);
 }
