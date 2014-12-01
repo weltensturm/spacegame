@@ -41,6 +41,9 @@ import
 	window;
 
 
+alias EventDraw = ws.event.Event!(ModelMatrix, Matrix!(4,4), Matrix!(4,4));
+
+
 class ModelMatrix: MatrixStack {
 
 	void reset(){
@@ -65,36 +68,38 @@ class Draw: System {
 
 		Model[string] models;
 		LoaderThread glLoader;
-		LoaderQueue mainLoader;
+		LoaderQueue batchFinisher;
+		LoaderQueue materialFinisher;
 		EntityManager ents;
 		WorldPerspective perspective;
 		Entity player;
-		Material defaultMat;
+		DeferredMaterial defaultMat;
 		ModelMatrix model;
 
 		bool rebuildFramebuffer;
 		
-		Shader shaderGeom;
 		Shader shaderLightPoint;
 		Shader directionalPass;
 		Shader shaderFinalize;
 		Shader nullPass;
-		GBuffer gbuffer;
+		//GBuffer gbuffer;
+		FrameBuffer geomBuffer;
 		FrameBuffer lightBuffer;
 		Batch screenQuad;
 		Model lightSphere;
 		int width, height;
 
-		float lastMatFinish;
+		int batchTick;
+		int materialTick;
 	}
 
 	Render render;
-	ws.event.Event!(ModelMatrix, Matrix!(4,4), Matrix!(4,4)) onDraw;
+	EventDraw eventDraw;
 
 	Model getModel(string path){
 		if(path in models)
 			return models[path];
-		auto m = new Model(path, glLoader, mainLoader);
+		auto m = new Model(path, glLoader, batchFinisher, materialFinisher);
 		models[path] = m;
 		return m;
 	}
@@ -103,36 +108,22 @@ class Draw: System {
 		this.ents = ents;
 		this.perspective = perspective;
 		model = new ModelMatrix;
-		defaultMat = new Material(
-			"error", ["singlelight": "forwardSpecular"], ["singlelight": "getSpecular"],
-			["vertex": gl.attributeVertex, "normal": gl.attributeNormal, "texture": gl.attributeTexture]
-		);
+		defaultMat = new DeferredMaterial("error", ["normal_default": "forwardNormal"], ["diffuse_default", "normal_default"]);
 		defaultMat.finish();
 		render = new Render({ return perspective.projection.getProjection * perspective.getView * model.back; });
 		auto sharedContext = window.shareContext;
 		glLoader = new LoaderThread({
 			window.makeCurrent(sharedContext);
 		});
-		mainLoader = new LoaderQueue;
-		onDraw = new ws.event.Event!(ModelMatrix, Matrix!(4,4), Matrix!(4,4));
+		batchFinisher = new LoaderQueue;
+		materialFinisher = new LoaderQueue;
+		eventDraw = new EventDraw;
 
 		width = 512;
 		height = 512;
-		gbuffer = new GBuffer(width, height);
+		//gbuffer = new GBuffer(width, height);
+		geomBuffer = new FrameBuffer(width, height, 2);
 		lightBuffer = new FrameBuffer(width, height, 1);
-		shaderGeom = Shader.load(
-				"deferred_geom",
-				[
-					gl.attributeVertex: "vertex",
-					gl.attributeNormal: "normal",
-					gl.attributeTexture: "texCoord"
-				],
-				[
-					GBuffer.DIFFUSE: "outDiffuse",
-					GBuffer.TEXCOORD: "outTexCoord",
-					GBuffer.NORMAL: "outNormal"
-				]
-		);
 		string[uint] empty;
 		nullPass = Shader.load("deferred_null", empty);
 		shaderLightPoint = Shader.load("deferred_light_point", [gl.attributeVertex: "vertex"]);
@@ -148,9 +139,6 @@ class Draw: System {
 		screenQuad.add([1, -1, 0]);
 		screenQuad.add([1, 1, 0]);
 		screenQuad.finish;
-
-		lastMatFinish = 0;
-
 	}
 
 	void draw(){
@@ -163,15 +151,22 @@ class Draw: System {
 		float[3] screen = [width, height, 0];
 
 		if(rebuildFramebuffer){
-			gbuffer.destroy;
-			gbuffer = new GBuffer(width, height);
+			//gbuffer.destroy;
+			//gbuffer = new GBuffer(width, height);
+			geomBuffer.destroy;
+			geomBuffer = new FrameBuffer(width, height, 2);
 			lightBuffer.destroy;
 			lightBuffer = new FrameBuffer(width, height, 1);
 			rebuildFramebuffer = false;
 		}
 		model.reset();
-		gbuffer.startFrame;
-		gbuffer.bindGeom;
+		//gbuffer.startFrame;
+		//gbuffer.bindGeom;
+		
+		geomBuffer.draw([DeferredMaterial.diffuse, DeferredMaterial.normal]);
+		glClearColor(0.3, 0.3, 0.3, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		glViewport(0,0,width,height);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
@@ -187,35 +182,36 @@ class Draw: System {
 
 			model.push;
 			model.translate(transform.position);
-			shaderGeom.use("mvp", matVP*model.back, "world", model.back);
-			model.pop;
 
 			foreach(d; drawable.model.data){
 				if(!d.batch)
 					continue;
-				if(d.material)
-					d.material.activateTextures;
+				auto mat = (d.material && d.material.loaded) ? d.material : defaultMat;
+				mat.use("mvp", matVP*model.back, "world", model.back);
 				d.batch.draw;
 			}
+
+			model.pop;
 		}
 		glEnable(GL_BLEND);
 		glDepthMask(GL_FALSE);
+		
 
 		// point lights
-		gbuffer.bindLight;
+		//gbuffer.bindLight;
 		lightBuffer.draw([0]);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		gbuffer.bindDepth(5);
+		//gbuffer.bindDepth(5);
+	
  		foreach(transform, light; ents.iterate!(Transform,PointLight)){
 			shaderLightPoint.use(
-					"mapDiffuse", GBuffer.DIFFUSE,
-					"mapTexCoord", GBuffer.TEXCOORD,
-					"mapNormal", GBuffer.NORMAL,
-					"mapDepth", 5,
+					"mapDiffuse", geomBuffer.textures[0].bind(0),
+					"mapNormal", geomBuffer.textures[1].bind(1),
+					"mapDepth", geomBuffer.depth.bind(2),
 
 					"screen", screen,
 					"vpI", matVP.inverse,
@@ -235,22 +231,21 @@ class Draw: System {
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		gbuffer.bindTextures;
-		lightBuffer.read([5: 0]);
+		//gbuffer.bindTextures;
+		//lightBuffer.read([5: 0]);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
+		
 		shaderFinalize.use(
 				"screen", screen,
-				"mapDiffuse", GBuffer.DIFFUSE,
-				"mapTexCoord", GBuffer.TEXCOORD,
-				"mapNormal", GBuffer.NORMAL,
-				"mapLight", 5
+				"mapDiffuse", geomBuffer.textures[0].bind(0),
+				"mapNormal", geomBuffer.textures[1].bind(1),
+				"mapLight", lightBuffer.textures[0].bind(2)
 		);
         screenQuad.draw;
-
-		blit(GBuffer.DIFFUSE, 20, 20, 300);
-		blit(GBuffer.NORMAL, 340, 20, 300);
-		blit(GBuffer.TEXCOORD, 660, 20, 300);
+		
+		geomBuffer.blit(0, 20, 20, 300);
+		geomBuffer.blit(1, 340, 20, 300);
 		lightBuffer.blit(0, 980, 20, 300);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -258,15 +253,22 @@ class Draw: System {
 		glDisable(GL_CULL_FACE);
 
 		try {
-			if(lastMatFinish < time.now){
-				mainLoader.tick();
-				lastMatFinish = time.now;
+			if(batchTick++ > 1){
+				batchFinisher.tick;
+				batchTick = 0;
+				writeln("batch: ", batchFinisher.length);
+			}
+			if(materialTick++ > 10){
+				materialFinisher.tick;
+				materialTick = 0;
+				writeln("material: ", materialFinisher.length);
 			}
 		}
 		catch(Exception e)
 			Log.warning("DRAW MAIN LOADER ERROR: " ~ e.toString);
 	}
 
+	/+
 	void blit(int which, int x, int y, int w){
 		float aspect = width/cast(float)height;
 		int h = cast(int)(w/aspect);
@@ -274,6 +276,7 @@ class Draw: System {
 		gbuffer.bindRead(which);
 		glBlitFramebuffer(0,0,width,height,x,y,x+w,y+h,GL_COLOR_BUFFER_BIT,GL_LINEAR);
 	}
+	+/
 
 	void setScreenSize(int w, int h){
 		rebuildFramebuffer = true;

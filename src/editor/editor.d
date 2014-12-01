@@ -111,7 +111,7 @@ class Editor: Base {
 		saveButton.leftClick ~= { savePopup(); };
 		auto loadButton = left.add!Button("load");
 
-		perspective.drawSystem.onDraw ~= &draw3d;
+		//perspective.drawSystem.eventDraw ~= &draw3d;
 	}
 
 
