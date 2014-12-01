@@ -5,6 +5,9 @@
 
 * DMD (other compilers not supported)
 * DUB
+* Lua 5.1
+* FreeType
+* miniupnpc
 * ws library in `../ws`
 
 #### Installing/Running
