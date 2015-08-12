@@ -1,14 +1,16 @@
-module weapon.ballcannon;
+module game.weapon.ballCannon;
 
 import
 	window,
 	game.entity.entity,
-	game.system.draw,
-	game.system.bulletWorld,
-	game.component.transform,
-	game.component.bulletPhysics,
-	game.component.pointLight,
-	game.component.drawable,
+	game.entity.player,
+	game.graphics.draw,
+	game.physics.bulletWorld,
+	game.component,
+	game.transform,
+	game.physics.bulletPhysics,
+	game.graphics.pointLight,
+	game.graphics.drawable,
 	weapon.base;
 
 
@@ -17,14 +19,14 @@ class BallCannon: Weapon {
 	protected {
 		EntityManager ents;
 		BulletWorld bullet;
-		Draw drawSystem;
-		Entity owner;
+		RenderPipeline renderPipeline;
+		Player owner;
 	}
 
-	this(EntityManager ents, Entity owner, Draw drawSystem, BulletWorld bullet){
+	this(EntityManager ents, Player owner, RenderPipeline renderPipeline, BulletWorld bullet){
 		this.ents = ents;
 		this.owner = owner;
-		this.drawSystem = drawSystem;
+		this.renderPipeline = renderPipeline;
 		this.bullet = bullet;
 		name = "Ball Cannon";
 	}
@@ -32,20 +34,18 @@ class BallCannon: Weapon {
 	override
 	void onPrimary(bool pressed){
 		if(pressed){
-			auto ent = ents.create!(Drawable,BulletPhysics,Transform,PointLight);
-			ent.get!Drawable.model = drawSystem.getModel("20cmsphere.obj");
-			ent.get!BulletPhysics.object = bullet.createObject("20cmsphere_ph.obj");
-			auto dir = owner.get!Transform.angle.forward;
-			ent.get!Transform.position = owner.get!Transform.position + dir*2;
+			auto ent = new Entity!(Drawable,BulletPhysics,Transform,PointLight);
+			ent.model = renderPipeline.getModel("20cmsphere.obj");
+			ent.object = bullet.createObject("20cmsphere_ph.obj");
+			ent.position = owner.position + owner.angle.forward*2;
 			//ent.get!BulletPhysics.object.setVel(dir*200);
 
-			auto light = ent.get!PointLight;
-			light.diffuseIntensity = 0.2;
-			light.color = [1,1,1];
-	        light.diffuseIntensity = 1;
-			light.attenuationConstant = 0;
-	        light.attenuationLinear = 0.1;
-	        light.attenuationExp = 0.001;
+			ent.color = [1,1,1];
+			ent.diffuseIntensity = 0.5;
+			ent.attenuationConstant = 0;
+			ent.attenuationLinear = 0.01;
+			ent.attenuationExp = 0.0001;
+			ents.add(ent);
 		}
 	}
 

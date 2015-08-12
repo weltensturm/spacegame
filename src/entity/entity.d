@@ -2,17 +2,18 @@ module game.entity.entity;
 
 
 import
+	std.string,
 	std.traits,
 	std.algorithm,
-	game.component.component;
+	game.component;
 
 
-final class Entity {
+class ComponentContainer {
 
 	private	Component[string] components;
 
 	T get(T)(){
-		return cast(T)components[typeid(T).toString];
+		return cast(T)components[T.stringof];
 	}
 
 	Component get(string s){
@@ -21,36 +22,56 @@ final class Entity {
 
 }
 
+class Entity(Args...): ComponentContainer {
 
-template Tuple(E...) {
-	alias Tuple = E;
+	mixin(memberComponents!(0, Args));
+
+	this(){
+		foreach(C; Args){
+			mixin("%s = new C;".format(memberName!(C.stringof)));
+			mixin("components[C.stringof] = %s;".format(memberName!(C.stringof)));
+		}
+	}
+
+	// alias-this everything
+	@property
+	auto ref opDispatch(string member)(){
+		static if(!checkExists!(member, Args))
+			static assert(0);
+		checkDuplicates!(member, Args);
+		foreach(C; Args){
+			static if(__traits(hasMember, C, member)){
+				mixin("return %s.%s;".format(memberName!(C.stringof), member));
+			}
+		}
+		assert(0);
+	}
+
 }
 
 
 class EntityManager {
 
-	private Entity[] entityList;
+	private ComponentContainer[] entityList;
+	private ComponentContainer[][string] componentLists;
 
-	Entity create(Components...)(){
-		auto e = new Entity;
-		addComponents!Components(e);
+	void add(ComponentContainer e){
 		entityList ~= e;
-		return e;
+		foreach(name, component; e.components){
+			if(name !in componentLists)
+				componentLists[name] = [];
+			componentLists[name].sortedInsert(e);
+			//assert(componentLists[name].isSorted!"cast(void*)a.entity < cast(void*)b.entity");
+		}
 	}
 
-	Entity[] get(Args...)(){
-		Entity[] result;
-		string[] names = typenames!Args;
-		foreach(e; entityList){
-			bool valid = true;
-			foreach(name; names){
-				if(name !in e.components){
-					valid = false;
-					break;
-				}
-			}
-			if(valid)
-				result ~= e;
+	ComponentContainer[] get(Args...)(){
+		ComponentContainer[] result;
+		mixin("Tuple!(" ~ containerListArgs!(Args.length-1) ~ ") queryLists;");
+		foreach(i, C; Args)
+			queryLists[i] = componentLists.get(C.stringof, []);
+		foreach(match; setIntersection!"cast(void*)a < cast(void*)b"(queryLists)){
+			result ~= match;
 		}
 		return result;
 	}
@@ -58,14 +79,6 @@ class EntityManager {
 	ComponentIterator!Args iterate(Args...)(){
 		return ComponentIterator!Args(this);
 	}
-
-	private void addComponents()(Entity e){}
-
-	private void addComponents(T, Tnext...)(Entity e){
-		e.components[typeid(T).toString] = new T;
-		addComponents!Tnext(e);
-	}
-
 
 }
 
@@ -80,29 +93,67 @@ private struct ComponentIterator(Args...) {
 
 	int opApply(int delegate(Args) dg){
 		int result = 0;
-		Args components;
-		string[] names = typenames!Args;
-		foreach(r; em.get!Args){
-			foreach(i, component; components){
-				components[i] = cast(Args[i])r.get(typeid(Args[i]).toString);
-			}
-			result = dg(components);
+		mixin("Tuple!(" ~ containerListArgs!(Args.length-1) ~ ") queryLists;");
+		foreach(i, C; Args)
+			queryLists[i] = em.componentLists.get(C.stringof, []);
+		Args parameters;
+		foreach(match; setIntersection!"cast(void*)a < cast(void*)b"(queryLists)){
+			foreach(i, C; Args)
+				parameters[i] = match.get!C;
+			synchronized(match)
+				result = dg(parameters);
 			if(result)
 				break;
 		}
-
 		return result;
 	}
 
 }
 
 
-private string[] typenames()(){
-	return [];
+
+template Tuple(Args...){
+	alias Tuple = Args;
 }
 
-private string[] typenames(T, Args...)(){
-	return [typeid(T).toString] ~ typenames!Args;
+void sortedInsert(ref ComponentContainer[] list, ComponentContainer ent){
+	list ~= ent;
+	list.sort!"cast(void*)a < cast(void*)b";
 }
 
+string containerListArgs(int amt)(){
+	static if(amt){
+		return "ComponentContainer[], " ~ containerListArgs!(amt-1);
+	}else
+		return "ComponentContainer[]";
+}
 
+bool checkExists(string member, Args...)(){
+	foreach(C; Args)
+		if(__traits(hasMember, C, member))
+			return true;
+	return false;
+}
+
+void checkDuplicates(string member, Args...)(){
+	foreach(I, C; Args)
+		foreach(Cc; Args[I..$]){
+			static if(!is(C == Cc) && __traits(hasMember, C, member) && __traits(hasMember, Cc, member)){
+				pragma(msg, "[ERROR] Duplicate member in %s and %s: %s".format(C.stringof, Cc.stringof, member));
+				static assert(0);
+			}
+		}
+}
+
+string memberName(string text)(){
+	return text ~ "_";
+}
+
+string memberComponents(int id)(){
+	return "";
+}
+
+string memberComponents(int id, T, Tmore...)(){
+	return "Args[%s] %s;\n".format(id, memberName!(T.stringof))
+		~ memberComponents!(id+1, Tmore);
+}

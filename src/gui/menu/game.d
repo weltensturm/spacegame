@@ -37,7 +37,6 @@ private:
 		int entryHeight = 50;
 
 		this(Commands commands){
-			super();
 			this.commands = commands;
 			foreach(f; dirEntries("scripts/maps", SpanMode.shallow))
 				addEntry(f);
@@ -51,13 +50,14 @@ private:
 			};
 		}
 
-		override void onResize(int w, int h){
-			int y = pos.y + h - padding - entryHeight;
+		override void resize(int[2] size){
+			int y = pos.y + size.h - padding - entryHeight;
 			foreach(c; children){
-				c.setPos(pos.x + padding, y);
-				c.setSize(w-padding*2, entryHeight);
+				c.move([pos.x + padding, y]);
+				c.resize([size.w-padding*2, entryHeight]);
 				y -= c.size.y + padding;
 			}
+			super.resize(size);
 		}
 	
 	}

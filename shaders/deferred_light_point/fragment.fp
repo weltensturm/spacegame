@@ -3,6 +3,7 @@
 uniform sampler2D mapDiffuse;
 uniform sampler2D mapTexCoord;
 uniform sampler2D mapNormal;
+uniform sampler2D mapLightData;
 uniform sampler2D mapDepth;
 
 uniform vec3 screen;
@@ -40,11 +41,13 @@ vec4 calcLightInternal(vec3 dir, vec3 pos, vec3 normal){
 		diffuse = vec4(lightColor, 1.0) * lightDiffuse * diffFactor;
 		vec3 eyeDir = normalize(eyePos - pos);
 		vec3 reflection = normalize(reflect(dir, normal));
+		/*
 		float specFactor = pow(max(0, dot(reflection, eyeDir)), 128.0);
 		specFactor = pow(specFactor, specPower);
 		if(specFactor > 0.0){
 			specular = vec4(lightColor, 1.0) * specIntensity * specFactor;
 		}
+		*/
 	}
 	return diffuse + specular;
 }
@@ -64,6 +67,10 @@ vec4 calcPointLight(vec3 pos, vec3 normal){
 
 void main(){
 	vec2 screenPos = gl_FragCoord.xy/screen.xy;
+	if(texture(mapLightData, screenPos).a < 0.01){
+		col = vec4(0,0,0,0);
+		return;
+	}
 	vec3 normal = texture(mapNormal, screenPos).xyz;
 	col = calcPointLight(worldPos(), normalize(normal));
 

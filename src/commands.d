@@ -10,6 +10,7 @@ import
 	ws.log,
 	ws.string,
 	ws.decode,
+	ws.io,
 	ws.gui.input;
 
 
@@ -19,6 +20,13 @@ alias void delegate(string) Command;
 class Commands {
 
 	Command[string] commands;
+
+	this(){
+		add("commands", {
+			foreach(name; sort(commands.keys))
+				writeln(name);
+		});
+	}
 
 	void add(T...)(string name, void delegate(T) fn){
 		commands[name] = (string arg){

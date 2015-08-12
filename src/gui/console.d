@@ -10,32 +10,35 @@ import
 	ws.gui.input,
 	ws.gui.text,
 	ws.gui.inputField,
-	ws.math.vector,
 	game.commands,
 	lua;
 
-//__gshared:
+__gshared:
 
 class Console: Base {
 	
 	this(Commands commands, Lua lua){
-		textField = add!Text();
-		textField.setLocalPos(5, 30);
+		textField = addNew!Text;
+		textField.moveLocal([5, 30]);
 		textField.setFont("UbuntuMono-R", 11);
-		auto old = ws.io.writeFunc;
+		auto writeOld = ws.io.writeFunc;
+		commands.add("history", {
+			writeln(textField.text);
+		});
 		ws.io.writeFunc = (arg){
-			try
+			try{
 				textField.text ~= arg;
-			catch(UnicodeException e)
-				textField.text ~= "[!] Invalid UTF string\n";
-			old(arg);
+				writeOld(arg);
+			}catch(UnicodeException e)
+				writeOld("C [!] Invalid UTF string\n");
 		};
-		textBox = add!InputField();
-		textBox.setLocalPos(5, 5);
+		textBox = addNew!InputField;
+		textBox.moveLocal([5, 5]);
 		textBox.onEnter ~= (line){
 			writeln("> %", line);
 			try {
-				lua.run(line);
+				commands.run(line);
+				//lua.run(line);
 			}catch(Exception e)
 				writeln(e);
 			history ~= line;
@@ -49,7 +52,7 @@ class Console: Base {
 		});
 
 		textField.style.fg = [1,1,1,1];
-		textBox.style = textField.style;
+		//textBox.style = textField.style;
 	}
 
 
@@ -65,6 +68,7 @@ class Console: Base {
 			}else if(k == Keyboard.escape)
 				hide();
 		}
+		super.onKeyboard(k, p);
 	}
 	
 	
@@ -73,20 +77,17 @@ class Console: Base {
 	}
 
 	override void onDraw(){
-		draw.setColor(0,0,0,0.7);
+		draw.setColor([0.1, 0.1, 0.1]);
 		draw.rect(pos, size);
-		draw.setColor(0,0,0,0.8);
-		draw.rect(0,0,5,size.y);
-		draw.rect(size.x-5,0,5,size.y);
-		draw.rect(5,0,size.x-10,5);
-		draw.rect(5,size.y-5,size.x-10,5);
-		draw.rect(5,25,size.x-10,5);
+		draw.setColor([0.2, 0.2, 0.2]);
+		draw.rect(pos, [size.x, 30]);
 		super.onDraw();
 	}
 
-	override void onResize(int w, int h){
-		textField.setSize(w-10, h-35);
-		textBox.setSize(w-10, 20);
+	override void resize(int[2] size){
+		textField.resize([size.w-10, size.h-35]);
+		textBox.resize([size.w-10, 20]);
+		super.resize(size);
 	}
 
 

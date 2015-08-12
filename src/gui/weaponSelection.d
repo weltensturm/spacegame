@@ -8,7 +8,7 @@ import
 	ws.gui.text,
 	ws.math.math,
 	ws.time,
-	game.component.weapons,
+	game.weapons.weapons,
 	weapon.base,
 	gui.engine;
 
@@ -18,7 +18,7 @@ class WeaponSelection: Base {
 
 	protected {
 		Weapons weapons;
-		Text titles[];
+		Text[] titles;
 		float lastActive;
 		float visibleTime = 2;
 	}
@@ -34,10 +34,10 @@ class WeaponSelection: Base {
 			int count = 0;
 			foreach(i, text; titles){
 				if(i == weapons.active)
-					draw.setColor(0.5,0.1,0.1,alpha);
+					draw.setColor([0.5,0.1,0.1,alpha]);
 				else
-					draw.setColor(0.1,0.1,0.1,alpha);
-				draw.rect(pos+Point(0,count++*30), [size.x, 30]);
+					draw.setColor([0.1,0.1,0.1,alpha]);
+				draw.rect(pos.a+[0,count++*30], [size.x, 30]);
 				text.style.fg = [1,1,1,alpha];
 			}
 			super.onDraw(); 
@@ -46,14 +46,14 @@ class WeaponSelection: Base {
 	
 	void update(){
 		foreach(t; titles)
-			children.remove(t);
+			children = children.without(t);
 		titles.destroy;
 		foreach(i, weapon; weapons.weapons){
-			auto name = add!Text();
+			auto name = addNew!Text();
 			name.text.set(weapon.name);
 			name.setFont("UbuntuMono-R", cast(int)(30/1.5));
-			name.setSize(size.x, 30);
-			name.setPos(pos.x, pos.y + cast(int)i*30);
+			name.resize([size.x, 30]);
+			name.move(pos.a + [0, i*30]);
 			titles ~= name;
 		}
 		lastActive = time.now;

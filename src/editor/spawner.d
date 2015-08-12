@@ -1,4 +1,4 @@
-module editor.spawner;
+module game.editor.spawner;
 
 
 import
@@ -10,7 +10,7 @@ import
 	ws.gui.grid,
 	ws.gui.button,
 	ws.gui.text,
-	editor.editor;
+	game.editor.editor;
 
 
 class Spawner: Grid {
@@ -26,7 +26,7 @@ class Spawner: Grid {
 	}
 
 	void addEntry(string n){
-		auto b = add!SpawnButton(n);
+		auto b = addNew!SpawnButton(n);
 		b.leftClick ~= {
 			//creator.spawn(n);
 		};
@@ -53,7 +53,7 @@ class SpawnButton: Button {
 
 	this(string t){
 		super(t);
-		title = add!Text();
+		title = addNew!Text;
 		title.text.set(t);
 		title.setFont("consola", 12);
 		try {
@@ -65,19 +65,20 @@ class SpawnButton: Button {
 		}
 	}
 	
-	override void onResize(int w, int h){
-		title.setPos(pos.x, pos.y);
-		title.setSize(w, 20);
+	override void resize(int[2] size){
+		title.move(pos);
+		title.resize([size.w, 20]);
+		super.resize(size);
 	}
 	
 	override void onDraw(){
-		draw.setColor(0, 0, 0, 0.8);
+		draw.setColor([0, 0, 0, 0.8]);
 		draw.rect(title.pos, title.size);
 		draw.rect(pos, size);
-		draw.setColor(1,1,1, mouseFocus ? 0.5 : 1);
-		draw.texture = image;
-		draw.texturedRect(pos+Point(5,5), size-Point(10,10));
-		draw.setColor(0, 0, 0, 0.8);
+		draw.setColor([1,1,1, mouseFocus ? 0.5 : 1]);
+		//draw.texture = image;
+		//draw.texturedRect(pos.a+[5,5], size.a-[10,10]);
+		draw.setColor([0, 0, 0, 0.8]);
 		draw.rect(title.pos, title.size);
 		title.onDraw();
 	}

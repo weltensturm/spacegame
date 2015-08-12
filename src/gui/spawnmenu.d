@@ -27,13 +27,13 @@ class SpawnMenu: Tabs {
 			if(engine.hasFocus || !p)
 				p ? show() : hide();
 		});
-		addPage("Entities", add!ListEntities(e));
+		addPage("Entities", addNew!ListEntities(e));
 		hide();
 	}
 
 	override void onDraw(){
-		draw.setColor(0,0,0,0.8);
-		draw.rect(pos+Point(1,1)*size.length/20, size-Point(1,1)*size.length/10);
+		draw.setColor([0,0,0,0.8]);
+		draw.rect(pos.a+[1,1].a*size.length/20, size.a-[1,1].a*size.length/10);
 		super.onDraw();
 	}
 
@@ -54,7 +54,7 @@ private:
 			+/
 		}
 
-		void addEntry(string n, Entity delegate() factory){
+		void addEntry(string n, ComponentContainer delegate() factory){
 			Button b = new EntityButton(n);
 			add(b);
 			b.leftClick ~= {
@@ -69,7 +69,7 @@ private:
 
 			this(string t){
 				super(t);
-				title = add!Text();
+				title = addNew!Text();
 				title.text.set(t);
 				title.setFont("consola", 12);
 				try 
@@ -78,17 +78,18 @@ private:
 					image = Texture.load("entities/default.tga");
 			}
 			
-			override void onResize(int w, int h){
-				title.setPos(pos.x, pos.y);
-				title.setSize(w, 20);
+			override void resize(int[2] size){
+				title.move(pos);
+				title.resize([size.w, 20]);
+				super.resize(size);
 			}
 			
 			override void onDraw(){
-				draw.setColor(0, 0, 0, 0.8);
+				draw.setColor([0,0,0,0.8]);
 				draw.rect(pos, size);
-				draw.setColor(1,1,1, mouseFocus ? 0.5 : 1);
-				draw.texture = image;
-				draw.texturedRect(pos+Point(5,5), size-Point(10,10));
+				draw.setColor([1,1,1, mouseFocus ? 0.5 : 1]);
+				//draw.texture = image;
+				//draw.texturedRect(pos.a+[5,5], size.a-[10,10]);
 				title.onDraw();
 			}
 			

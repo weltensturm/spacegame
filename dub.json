@@ -10,31 +10,12 @@
 	"targetType": "executable",
 	
 	"dependencies" : {
-		"derelict-gl3": "~master",
-		"derelict-ft": "~master",
-		"derelict-fi": "~master"
+		"ws": ">=1.0.2"
 	},
 
-	"includePaths": [
-		"../"
-	],
+	"sourcePaths": ["src"],
 
-	"sourcePaths": [
-		"src",
-		"../ws"
-	],
+	"libs-posix": ["X11", "GL"]
 
-	"excludedSourceFiles": [
-		"../ws/physics/ode/*"
-	],
-
-	"libs-posix": ["X11", "GL"],
-
-	"buildOptions": [
-		"debugMode",
-		"debugInfo",
-		"unittests"
-	]
-	
 }
 

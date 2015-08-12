@@ -1,8 +1,8 @@
 #version 130
 
 in vec2 texCoord;
-
+out vec2 passTexCoord;
 
 void forwardTexCoords(){
-	//passTexCoord = texCoord;
+	passTexCoord = texCoord;
 }

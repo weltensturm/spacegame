@@ -5,11 +5,12 @@ import
 	ws.gui.base,
 	ws.math,
 	gui.weaponSelection,
-	game.component.projection,
-	game.component.transform,
-	game.component.weapons,
-	game.system.draw,
+	game.transform,
+	game.graphics.projection,
+	game.graphics.draw,
+	game.weapons.weapons,
 	game.entity.entity,
+	game.entity.player,
 	game.commands,
 	window;
 
@@ -19,7 +20,7 @@ __gshared:
 
 class WorldPerspective: Base {
 
-	Draw drawSystem;
+	RenderPipeline renderPipeline;
 	Transform transform;
 	Projection projection;
 	Window window;
@@ -29,31 +30,32 @@ class WorldPerspective: Base {
 		Matrix!(4,4) view;
 	}
 
-	this(Window window, EntityManager ents, Commands commands, Entity player){
+	this(Window window, EntityManager ents, Commands commands, Player player){
 		this.window = window;
-		drawSystem = new Draw(window, ents, player, this);
+		renderPipeline = new RenderPipeline(window, ents, this);
 		setCursor(Mouse.cursor.none);
 		transform = player.get!Transform;
 		projection = player.get!Projection;
-		weaponSelection = add!WeaponSelection(player.get!Weapons);
-		weaponSelection.setPos(100, 100);
-		weaponSelection.setSize(200, 100);
+		weaponSelection = addNew!WeaponSelection(player.get!Weapons);
+		weaponSelection.move([100, 100]);
+		weaponSelection.resize([200, 100]);
 		view = new Matrix!(4,4);
 	}
 
 	override void onDraw(){
 		glViewport(0,0,size[0],size[1]);
-		drawSystem.draw();
+		renderPipeline.draw();
 		glViewport(0,0,size[0],size[1]);
 		glEnable(GL_BLEND);
 	}
 
 
-	override void onResize(int x, int y){
-		if (!y)
-			y = 1;
-		projection.aspect = cast(double)x/cast(double)y;
-		drawSystem.setScreenSize(x, y);
+	override void resize(int[2] size){
+		if (!size.h)
+			size.h = 1;
+		projection.aspect = cast(double)size.w/cast(double)size.h;
+		renderPipeline.setScreenSize(size.w, size.h);
+		super.resize(size);
 	}
 
 	Matrix!(4,4) getView(){
@@ -73,8 +75,8 @@ class WorldPerspective: Base {
 	}
 
 	override void onMouseMove(int x, int y){
-		if(hasFocus && (x > size.x/4*3 || x < size.x/4 || y > size.y/4*3 || y < size.y/4))
-			window.setCursorPos(size.x/2, size.y/2);
+		if(hasFocus && window.keyboardFocus && (x > size.w/4*3 || x < size.w/4 || y > size.h/4*3 || y < size.h/4))
+			window.setCursorPos(size.w/2, size.h/2);
 	}
 
 	void update(){

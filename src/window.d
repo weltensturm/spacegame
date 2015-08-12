@@ -39,6 +39,8 @@ static assert(ws.vers.VERSION >= 1, "Version 1 of WS required");
 
 int main(string[] args){
 	auto window = new Window(1280, 720, "Engine", args);
+	wm.add(window);
+
 	while(wm.hasActiveWindows()){
 		try {
 			wm.processEvents;
@@ -61,13 +63,14 @@ class Window: ws.wm.Window {
 	double currentTime;
 	Framerate framerate;
 	Engine engine;
+	bool keyboardFocus;
 
 	this(int w, int h, string t, string[] args){
 		super(w, h, t);
 		chdir("..");
-		engine = add!Engine(this);
+		engine = addNew!Engine(this);
 		setTop(engine);
-		onResize(size[0], size[1]);
+		resize(size);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
 	}
@@ -80,10 +83,11 @@ class Window: ws.wm.Window {
 
 
 	override void onDraw(){
-		assert(gl.active());
+		if(!gl.active())
+			throw new Exception("gl not active in thread %s".format(cast(void*)Thread.getThis()));
 
 		double renderStart = time.now();
-		currentTime = renderStart + clamp!double(1.0/120.5 - (renderStart - framerate.lastRender), 0, 1);
+		currentTime = renderStart + ws.math.clamp!double(1.0/120.5 - (renderStart - framerate.lastRender), 0, 1);
 		time.sleep(currentTime - renderStart);
 
 		super.onDraw;
@@ -117,6 +121,10 @@ class Window: ws.wm.Window {
 		super.onKeyboard(key, pressed);
 	}
 
+	override void onKeyboardFocus(bool focus){
+		keyboardFocus = focus;
+		super.onKeyboardFocus(focus);
+	}
 
 	override void hide(){
 		super.hide;
@@ -124,12 +132,12 @@ class Window: ws.wm.Window {
 	}
 
 
-	override void onResize(int x, int y){
-		glViewport(0, 0, x, y);
-		draw.setScreenResolution(x, y);
+	override void resize(int[2] size){
+		glViewport(0, 0, size.w, size.h);
+		draw.resize(size);
 		foreach(c; children ~ hiddenChildren)
-			c.setSize(Point(x, y) - c.pos);
-		super.onResize(x, y);
+			c.resize([size.w-c.pos.x, size.h-c.pos.y]);
+		super.resize(size);
 	}
 	
 	/// returns time in seconds since program start

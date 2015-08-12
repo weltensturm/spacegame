@@ -11,10 +11,10 @@ import
 
 	gui.engine,
 
-	editor.editor,
-	game.component.noclip,
-	game.component.transform,
-	game.system.voxelHeap;
+	game.editor.editor,
+	game.physics.noclip,
+	game.transform,
+	game.voxelHeap;
 
 
 class Perspective: Base {

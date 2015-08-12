@@ -31,7 +31,7 @@ class Menu: Tabs {
 		style.fg = [1, 1, 1, 1];
 		setStyle(style);
 		addPage("game", new Game(commands));
-		addPage("options", new Options(commands, engine.controls));
+		addPage("options", new Options(commands, engine.input));
 		addPage("quit", new Base).button.leftClick ~= {
 			commands.run("exit");
 		};
@@ -41,7 +41,7 @@ class Menu: Tabs {
 	}
 
 	override void onDraw(){
-		draw.setColor(0,0,0,0.9);
+		draw.setColor([0,0,0,0.9]);
 		draw.rect(pos, size);
 		super.onDraw();
 	}
